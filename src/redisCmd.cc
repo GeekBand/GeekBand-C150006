@@ -12,7 +12,6 @@
 namespace redis
 {
 
-std::map<std::string, Cmd*> Cmd::prototypeMap_;
 
 void Cmd::addPrototype(const std::string& typeName, Cmd* cmd)
 {
@@ -25,7 +24,7 @@ void Cmd::addPrototype(const std::string& typeName, Cmd* cmd)
   {
     if (prototypeMap_.find(cmdName) == prototypeMap_.end())
     {
-      prototypeMap_[cmdName] = cmd;
+      Cmd::prototypeMap_[cmdName] = cmd;
     }
 
   }

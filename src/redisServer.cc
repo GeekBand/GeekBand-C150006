@@ -25,7 +25,10 @@ void RedisServer::onConnection(const muduo::net::TcpConnectionPtr& conn)
            << ((conn->connected()) ? "UP" : "DOWN");
   if (conn->connected())
   {
+    //新的request对象的智能指针
+    //参考7.2章节的版本三，用智能指针管理对象生命周期，使上下文里的内容的生命周期和TcpConnection一样长
     RequestPtr requestCtx(new Request());
+    //在该connection对象的上下文里保存request对象的智能指针
     conn->setContext(requestCtx);
   }
 }
@@ -39,6 +42,7 @@ void RedisServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
   while (buf->readableBytes() > 0)
   {
     Request::ParseRet ret = requestPtr->parse(buf);
+    //先用request对象的方法解析数据，希望解析过程正常，否则就报错退出连接
     if (ret == Request::kParseOK)
     {
       Request tmp;
@@ -54,6 +58,7 @@ void RedisServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
         Cmd* cmd = prototype->clone();
         ResponsePtr rspPtr = cmd->process(allCmd);
         rspPtr->serializeToString(&output);
+        delete cmd;
       }
       else
       {
