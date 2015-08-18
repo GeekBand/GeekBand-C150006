@@ -66,7 +66,7 @@ ResponsePtr TypeCmd::process(const std::vector<RequestParam>& cmdParam)
     return ResponsePtr(new SimpleStrResponse("none"));
   }
 
-  return ResponsePtr(new SimpleStrResponse(obj->typeNmae()));
+  return ResponsePtr(new SimpleStrResponse(obj->typeName()));
 }
 
 Cmd *TypeCmd::clone() const

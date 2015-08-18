@@ -16,7 +16,7 @@ class ListObject: public Object
   typedef std::list<StrObjectPtr>::iterator ListObjIte;
   typedef std::list<StrObjectPtr>::const_iterator ListObjConstIte;
 
-  const std::string& typeNmae() const { return typeName_; }
+  const std::string& typeName() const { return typeName_; }
 
   size_t getSize() const { return list_.size(); }
 

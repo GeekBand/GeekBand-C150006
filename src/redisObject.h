@@ -11,7 +11,7 @@ namespace redis
 class Object
 {
  public:
-  virtual const std::string& typeNmae() const = 0;
+  virtual const std::string& typeName() const = 0;
   virtual ~Object() { ::printf("~Object()\n"); }
 };
 

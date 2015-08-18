@@ -67,10 +67,11 @@ ResponsePtr Cmd::checkTypeAndParamNum(const std::vector<RequestParam>& cmdParam,
     return numCheckRsp;
   }
 
+  //从字典里尝试取出该键值对，然后检查新的命令里的key的类型是否和字典里的key的类型一致
   DatabaseManage *dbm = DatabaseManage::getInstance();
   ObjectPtr obj = dbm->queryKeyValue(std::string(cmdParam[1].start(), cmdParam[1].len()));
   *pObj = obj;
-  if (obj.get() && obj->typeNmae() != type)
+  if (obj.get() && obj->typeName() != type)
   {
     return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
   }

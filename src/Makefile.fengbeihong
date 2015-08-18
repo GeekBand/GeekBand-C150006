@@ -12,10 +12,10 @@ CPP = g++
 CC = gcc
 
 #ifeq ($(ver),64)
-DIR_LIBS = ../muduo_x64/lib 
+DIR_LIBS = ../muduo_x64/lib
 INCLUDE_DIRS = -I../muduo_x64/include
 #else
-#DIR_LIBS = ../muduo_x86/lib 
+#DIR_LIBS = ../muduo_x86/lib
 #INCLUDE_DIRS = -I../muduo_x86/include
 #endif
 
@@ -25,7 +25,7 @@ CFLAGS = -Wall -gdwarf-2 -g3 -O0 $(INCLUDE_DIRS)
 
 RMS = $(OBJS) $(TARGET)
 
-all: clean $(TARGET)
+all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CPP) -L$(DIR_LIBS) -o $@ $^ $(LINK_LIBS)

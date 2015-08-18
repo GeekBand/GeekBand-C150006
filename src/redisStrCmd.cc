@@ -79,7 +79,7 @@ ResponsePtr GetCmd::process(const std::vector<RequestParam>& cmdParam)
     return ResponsePtr(new BulkResponse(StrObjectPtr()));
   }
 
-  if (val->typeNmae() != std::string("string"))
+  if (val->typeName() != std::string("string"))
   {
     LOG_ERROR << "Get Commd type error!";
     return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));

@@ -18,12 +18,14 @@ class StrObject: public Object
   StrObject(std::string& str)
     : str_(str) { }
 
-  const std::string& typeNmae() const;
+  const std::string& typeName() const;
 
   size_t getSize() const;
   const std::string& getStrObjVal() const;
   void setStrObjVal(const std::string& val);
   void setStrObjVal(const char *str, size_t len);
+
+  std::string& getStr() { return str_; }
  private:
   std::string str_;
 

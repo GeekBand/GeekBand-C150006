@@ -3,9 +3,11 @@
 
 
 #include <string>
+#include <map>
 #include <boost/shared_ptr.hpp>
 
 #include "redisObject.h"
+#include "redisStrObject.h"
 
 namespace redis
 {
@@ -16,8 +18,8 @@ public:
   const std::string& typeName() const { return typeName_; }
 
   //zadd，新增元素和分值，返回是否正确，可以批量添加
-  bool zadd(std::map<double, StrObjectPtr&>& map);
-  bool zadd(std::vector<std::map<double, StrObjectPtr&>&>& mapList);
+  bool zadd(double, StrObjectPtr&);
+  //bool zadd(std::vector<std::map<double, StrObjectPtr&>&>& mapList);
 
   //zcard，获取dict_的全部元素数量
   int zcard();
@@ -42,11 +44,11 @@ public:
 
   //zrem，删除元素，也可以批量删除
   bool zrem(StrObjectPtr& obj);
-  bool zrem(std::vector<StrObjectPtr&> objList);
+  //bool zrem(std::vector<StrObjectPtr&> objList);
 
 private:
   //map，按照分值进行排序，获取字符串对象还需要
-  std::map<double, StrObjectPtr&> dict_;
+  std::map<double, StrObjectPtr> dict_;
 
   static std::string typeName_;
 };
