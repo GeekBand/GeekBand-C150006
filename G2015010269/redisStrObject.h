@@ -11,10 +11,22 @@ namespace redis
 class StrObject: public Object
 {
  public:
-  size_t byteSize() const;
-  size_t serializeToArray(char *buf, size_t len) const;
+  StrObject() { }
+  StrObject(const char *begin, size_t len)
+    : str_(begin, len) { }
+  StrObject(std::string& str)
+    : str_(str) { }
+
+  const std::string& typeNmae() const;
+
+  size_t getSize() const;
+  const std::string& getStrObjVal() const;
+  void setStrObjVal(const std::string& val);
+  void setStrObjVal(const char *str, size_t len);
  private:
   std::string str_;
+
+  static std::string typeName_;
 };
 
 }

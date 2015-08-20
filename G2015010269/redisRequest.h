@@ -17,17 +17,22 @@ class RequestParam
 {
  public:
   RequestParam()
-   : start_(0), len_(0) { }
-  size_t start() { return start_; }
-  int32_t len() { return len_; }
+   : offset_(0), len_(0), buf_(NULL) { }
+  size_t offset() const { return offset_; }
+  int32_t len() const { return len_; }
 
-  void start(size_t setVal) { start_ = setVal; }
+  void offset(size_t setVal) { offset_ = setVal; }
   void len(int32_t len) { len_ = len; }
 
-  void clear() { start_ = 0; len_ = 0; }
+  void clear() { offset_ = 0; len_ = 0; buf_ = NULL; }
+  void buffer(const char *buf) { buf_ = buf; }
+  const char *buffer() const { return buf_; }
+  const char *start() const { return buf_ + offset_; }
  private:
-  size_t start_;
+  size_t offset_;
   int32_t len_;
+
+  const char *buf_;
 };
 
 class Request
@@ -45,7 +50,7 @@ class Request
 
   Request(): paramNum_(0), parsedNum_(0),
       parseState_(kReqtStart), exceptLen_(0),
-      actualLen_(0), parsePos_(0) { }
+      parsePos_(0) { }
 
   ParseRet parse(muduo::net::Buffer *buf);
   void swap(Request& other);
@@ -53,7 +58,7 @@ class Request
   const std::vector<RequestParam>& getReferenceOfAllParam()
   { return allParams_; }
 
-  void dump(muduo::net::Buffer *buf);
+  void dump();
  private:
   enum ParseState
   {
@@ -74,7 +79,7 @@ class Request
 
   RequestParam paramTmp_;
   int32_t exceptLen_;
-  int32_t actualLen_;
+  //int32_t actualLen_;
 
   size_t parsePos_;
   std::string strNum_;
@@ -82,7 +87,7 @@ class Request
   std::vector<RequestParam> allParams_;
 
   ParseRet parseDigit(char ch, int32_t *val, ParseState next);
-  ParseRet parseParam(char ch, size_t pos, ParseState next);
+  ParseRet parseParam(char ch, size_t pos, const char *buf, ParseState next);
   ParseRet parseChar(char ch, char expect, ParseState next);
 };
 

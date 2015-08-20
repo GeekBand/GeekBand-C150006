@@ -17,8 +17,7 @@ void Cmd::addPrototype(const std::string& typeName, Cmd* cmd)
   std::transform(typeName.begin(), typeName.end(),
                  std::back_inserter(upperStr), ::toupper);
 
-  if (prototypeMap_.find(upperStr) != prototypeMap_.end()
-      || prototypeMap_.empty())
+  if (prototypeMap_.find(upperStr) == prototypeMap_.end())
   {
     prototypeMap_[upperStr] = cmd;
   }

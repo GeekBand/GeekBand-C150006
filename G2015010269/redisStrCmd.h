@@ -9,6 +9,7 @@
 namespace redis
 {
 
+//////////////////////////// cmd of set start /////////////////////////////
 class SetCmd: public Cmd
 {
  public:
@@ -21,6 +22,21 @@ class SetCmd: public Cmd
 
   static std::string name_;
   static SetCmd prototype_;
+};
+
+//////////////////////////// cmd of get start /////////////////////////////
+class GetCmd: public Cmd
+{
+ public:
+  Cmd *clone() const;
+  void process(const std::vector<RequestParam>& cmdParam, const char *buf);
+  const std::string& typeName() const { return name_; }
+ private:
+  GetCmd();
+  GetCmd(const std::string& name);
+
+  static std::string name_;
+  static GetCmd prototype_;
 };
 
 }

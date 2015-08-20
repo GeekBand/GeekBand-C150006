@@ -42,7 +42,7 @@ void RedisServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
       Request tmp;
       requestPtr->swap(tmp);
       size_t end = tmp.curParsePos();
-      tmp.dump(buf);
+      tmp.dump();
 
       const std::vector<RequestParam>& allCmd = tmp.getReferenceOfAllParam();
       if (allCmd.size() < 1)
@@ -52,7 +52,7 @@ void RedisServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
       }
       RequestParam cmdName = allCmd[0];
       const Cmd *prototype = Cmd::getPrototypeByName(
-            std::string(buf->peek() + cmdName.start(), cmdName.len()));
+            std::string(cmdName.start(), cmdName.len()));
       if (prototype == NULL)
       {
         conn->shutdown();

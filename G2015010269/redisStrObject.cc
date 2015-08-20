@@ -5,17 +5,30 @@
 namespace redis
 {
 
-size_t StrObject::byteSize() const
+std::string StrObject::typeName_("string");
+
+const std::string& StrObject::typeNmae() const
+{
+  return typeName_;
+}
+
+size_t StrObject::getSize() const
 {
   return str_.size();
 }
 
-size_t StrObject::serializeToArray(char *buf, size_t len) const
+const std::string& StrObject::getStrObjVal() const
 {
-  int copysize = (str_.size() <= len) ? str_.size() : len;
-  memcpy(buf, str_.c_str(), copysize);
+  return str_;
+}
+void StrObject::setStrObjVal(const std::string& val)
+{
+  str_ = val;
+}
 
-  return copysize;
+void StrObject::setStrObjVal(const char *str, size_t len)
+{
+  str_ = std::string(str, len);
 }
 
 }

@@ -58,18 +58,20 @@ Request::ParseRet Request::parseDigit(char ch, int32_t *val, ParseState next)
   return kParseContinue;
 }
 
-Request::ParseRet Request::parseParam(char ch, size_t pos, ParseState next)
+Request::ParseRet Request::parseParam(char ch, size_t pos, const char *buf, ParseState next)
 {
-  if (ch == kCR)
+  if ((paramTmp_.buffer() != NULL) &&
+      (pos - paramTmp_.offset() == static_cast<size_t>(exceptLen_)))
   {
-    if (actualLen_ != exceptLen_)
+    if (ch != kCR)
     {
-      return kParseErr; 
+      return kParseErr;
     }
-    paramTmp_.len(actualLen_);
+    paramTmp_.len(exceptLen_);
+
+    paramTmp_.buffer(buf);
     allParams_.push_back(paramTmp_);
 
-    actualLen_ = 0;
     exceptLen_ = 0;
     paramTmp_.clear();
 
@@ -78,11 +80,12 @@ Request::ParseRet Request::parseParam(char ch, size_t pos, ParseState next)
     return kParseContinue;
   }
 
-  if (actualLen_ == 0)
+  if (paramTmp_.start() == 0)
   {
-    paramTmp_.start(pos);
+    paramTmp_.offset(pos);
   }
-  actualLen_++;
+
+  paramTmp_.buffer(buf);
 
   return kParseContinue;
 }
@@ -130,7 +133,7 @@ Request::ParseRet Request::parse(Buffer *buf)
       CONTINUE_OR_GOTO_DONE(ret);
       break;
     case kReqParamVal:
-      ret = parseParam(ch, idx, kReqCrLfOfParam);
+      ret = parseParam(ch, idx, buf->peek(), kReqCrLfOfParam);
 
       CONTINUE_OR_GOTO_DONE(ret);
       break;
@@ -168,7 +171,7 @@ void Request::swap(Request& other)
 
   std::swap(paramTmp_, other.paramTmp_);
   std::swap(exceptLen_, other.exceptLen_);
-  std::swap(actualLen_, other.actualLen_);
+  //std::swap(actualLen_, other.actualLen_);
 
   std::swap(parsePos_, other.parsePos_);
   std::swap(strNum_, other.strNum_);
@@ -176,12 +179,12 @@ void Request::swap(Request& other)
   allParams_.swap(other.allParams_);
 }
 
-void Request::dump(Buffer *buf)
+void Request::dump()
 {
   std::cout << "Num of param: " << paramNum_ << std::endl;;
   for (size_t i = 0; i < allParams_.size(); i++)
   {
-    std::cout << std::string(buf->peek() + allParams_[i].start(),
+    std::cout << std::string(allParams_[i].start(),
                              allParams_[i].len()) << std::endl;
   }
 }
