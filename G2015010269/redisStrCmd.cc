@@ -4,6 +4,7 @@
 #include "redisObject.h"
 #include "redisStrObject.h"
 #include "redisMapDatabase.h"
+#include "redisAllResp.h"
 
 namespace redis
 {
@@ -11,7 +12,7 @@ namespace redis
 MapDatabase gMapDb;
 Database *db = &gMapDb;
 
-///////////////////////// cmd of set start ///////////////////////////////
+///////////////////////// cmd of set begin ///////////////////////////////
 
 std::string SetCmd::name_("SET");
 SetCmd SetCmd::prototype_;
@@ -26,19 +27,19 @@ SetCmd::SetCmd(const std::string& name)
   (void)name;
 }
 
-void SetCmd::process(const std::vector<RequestParam>& cmdParam, const char *buf)
+ResponsePtr SetCmd::process(const std::vector<RequestParam>& cmdParam, const char *buf)
 {
   if (cmdParam.size() != 3)
   {
     LOG_ERROR << "Set Commd syntax error!";
-    return;
+    return ResponsePtr();
   }
 
   ObjectPtr strObj(new StrObject(cmdParam[2].start(), cmdParam[2].len()));
   std::string key(cmdParam[1].start(), cmdParam[1].len());
   db->updateKeyValue(key, strObj);
 
-  return;
+  return ResponsePtr(new SimpleStrResponse("OK"));
 }
 
 Cmd *SetCmd::clone() const
@@ -46,7 +47,7 @@ Cmd *SetCmd::clone() const
   return new SetCmd(name_);
 }
 
-///////////////////////// cmd of get start ///////////////////////////////
+///////////////////////// cmd of get begin ///////////////////////////////
 std::string GetCmd::name_("GET");
 GetCmd GetCmd::prototype_;
 
@@ -60,12 +61,12 @@ GetCmd::GetCmd(const std::string& name)
   (void)name;
 }
 
-void GetCmd::process(const std::vector<RequestParam>& cmdParam, const char *buf)
+ResponsePtr GetCmd::process(const std::vector<RequestParam>& cmdParam, const char *buf)
 {
   if (cmdParam.size() != 2)
   {
     LOG_ERROR << "Get Commd syntax error!";
-    return;
+    return ResponsePtr();
   }
 
   std::string key(cmdParam[1].start(), cmdParam[1].len());
@@ -75,19 +76,19 @@ void GetCmd::process(const std::vector<RequestParam>& cmdParam, const char *buf)
   if (!val.get())
   {
     LOG_ERROR << "The val of key is nil!";
-    return;
+    return ResponsePtr();
   }
 
   if (val->typeNmae() != std::string("string"))
   {
     LOG_ERROR << "Get Commd type error!";
-    return;
+    return ResponsePtr();
   }
 
   boost::shared_ptr<StrObject> strObj = boost::static_pointer_cast<StrObject>(val);
   LOG_INFO << "The val is " << '"' << strObj->getStrObjVal() << '"';
 
-  return;
+  return ResponsePtr();
 }
 
 Cmd *GetCmd::clone() const

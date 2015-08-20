@@ -4,16 +4,21 @@
 #include <string>
 #include <map>
 
+#include <boost/shared_ptr.hpp>
+
 #include "redisRequest.h"
+#include "redisResp.h"
 
 namespace redis
 {
+
+typedef boost::shared_ptr<Response> ResponsePtr;
 
 class Cmd
 {
  public:
   virtual Cmd *clone() const = 0;
-  virtual void process(const std::vector<RequestParam>& cmdParam,
+  virtual ResponsePtr process(const std::vector<RequestParam>& cmdParam,
                        const char* buf) = 0;
   virtual const std::string& typeName() const = 0;
   virtual ~Cmd() { }

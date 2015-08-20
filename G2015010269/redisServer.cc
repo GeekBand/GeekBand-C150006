@@ -4,6 +4,7 @@
 
 #include "redisServer.h"
 #include "redisCmd.h"
+#include "redisResp.h"
 
 namespace redis
 {
@@ -59,8 +60,9 @@ void RedisServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
         break;
       }
       Cmd* cmd = prototype->clone();
-      cmd->process(allCmd, buf->peek());
-
+      ResponsePtr rspPtr = cmd->process(allCmd, buf->peek());
+      muduo::net::Buffer sendbuf(rspPtr->size());
+      //rspPtr->serializeToArray();
       buf->retrieveUntil(buf->peek() + end);
       conn->send(std::string("+OK\r\n"));
     }

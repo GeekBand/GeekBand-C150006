@@ -14,7 +14,7 @@ class SetCmd: public Cmd
 {
  public:
   Cmd *clone() const;
-  void process(const std::vector<RequestParam>& cmdParam, const char *buf);
+  ResponsePtr process(const std::vector<RequestParam>& cmdParam, const char *buf);
   const std::string& typeName() const { return name_; }
  private:
   SetCmd();
@@ -29,7 +29,7 @@ class GetCmd: public Cmd
 {
  public:
   Cmd *clone() const;
-  void process(const std::vector<RequestParam>& cmdParam, const char *buf);
+  ResponsePtr process(const std::vector<RequestParam>& cmdParam, const char *buf);
   const std::string& typeName() const { return name_; }
  private:
   GetCmd();
