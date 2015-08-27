@@ -10,8 +10,8 @@ class Response
 {
  public:
   virtual size_t size() const = 0;
-  virtual size_t serializeToArray(char *data, size_t size) const = 0;
-  //virtual bool serializeToArray(std::string* output) const = 0;
+  //virtual size_t serializeToArray(char *data, size_t size) const = 0;
+  virtual bool serializeToString(std::string* output) const = 0;
   virtual ~Response() { }
 };
 

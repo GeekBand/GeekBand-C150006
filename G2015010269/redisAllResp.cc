@@ -20,24 +20,15 @@ size_t IntResponse::size() const
   return strLen_ + 3;
 }
 
-size_t IntResponse::serializeToArray(char *data, size_t size) const
+bool IntResponse::serializeToString(std::string* output) const
 {
-  if (size < strLen_ + 3)
-  {
-    return 0;
-  }
+  output->clear();
 
-  size_t pos = 0;
-  ::memcpy(data + pos, ":", 1);
-  pos++;
+  output->push_back(':');
+  *output += buf_;
+  *output += "\r\n";
 
-  ::memcpy(data + pos, buf_, strLen_);
-  pos += strLen_;
-
-  ::memcpy(data + pos, "\r\n", 2);
-  pos += 2;
-
-  return pos;
+  return true;
 }
 
 ///////////////////////// resp of simple begin ///////////////////////////////
@@ -47,25 +38,15 @@ size_t SimpleStrResponse::size() const
   return str_.size() + 3;
 }
 
-size_t SimpleStrResponse::serializeToArray(char *data, size_t size) const
+bool SimpleStrResponse::serializeToString(std::string* output) const
 {
-  size_t totalSize = str_.size() + 3;
-  if (size < totalSize)
-  {
-    return 0;
-  }
+  output->clear();
 
-  size_t pos = 0;
-  ::memcpy(data + pos, "+", 1);
-  pos++;
+  output->push_back('+');
+  *output += str_;
+  *output += "\r\n";
 
-  ::memcpy(data + pos, str_.c_str(), str_.size());
-  pos += str_.size();
-
-  ::memcpy(data + pos, "\r\n", 2);
-  pos += 2;
-
-  return pos;
+  return true;
 }
 
 bool SimpleStrResponse::valid()
@@ -74,6 +55,67 @@ bool SimpleStrResponse::valid()
       || str_.find('\n') != std::string::npos)
   {
     return false;
+  }
+
+  return true;
+}
+
+///////////////////////// resp of err begin ///////////////////////////////
+size_t ErrResponse::size() const
+{
+  //"-" + type + ' '+ content + "\r\n"
+  return 1 + errType_.size() + 1 + errContent_.size() + 2;
+}
+
+bool ErrResponse::serializeToString(std::string* output) const
+{
+  output->clear();
+
+  output->append("-");
+  output->append(errType_);
+  output->append(" ");
+  output->append(errContent_);
+  output->append("\r\n");
+
+  return true;
+}
+
+///////////////////////// resp of bulk begin ///////////////////////////////
+BulkResponse::BulkResponse(const std::string *str)
+  :val_(str), lenBin(0)
+{
+  if (val_ != NULL)
+  {
+    lenBin = snprintf(lenStr, sizeof(lenStr), "%lu", str->size());
+  }
+}
+
+size_t BulkResponse::size() const
+{
+  if (val_ == NULL)
+  {
+    //$-1\r\n
+    return 5;
+  }
+
+  //$ + 2 * \r\n
+  return lenBin + val_->size() + 1 + 2 + 2;
+}
+
+bool BulkResponse::serializeToString(std::string* output) const
+{
+  if (val_ != NULL)
+  {
+    output->clear();
+    output->append("$");
+    output->append(lenStr);
+    output->append("\r\n");
+    output->append(*val_);
+    output->append("\r\n");
+  }
+  else
+  {
+    output->append("$-1\r\n");
   }
 
   return true;

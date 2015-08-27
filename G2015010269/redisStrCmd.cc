@@ -27,7 +27,7 @@ SetCmd::SetCmd(const std::string& name)
   (void)name;
 }
 
-ResponsePtr SetCmd::process(const std::vector<RequestParam>& cmdParam, const char *buf)
+ResponsePtr SetCmd::process(const std::vector<RequestParam>& cmdParam)
 {
   if (cmdParam.size() != 3)
   {
@@ -61,12 +61,12 @@ GetCmd::GetCmd(const std::string& name)
   (void)name;
 }
 
-ResponsePtr GetCmd::process(const std::vector<RequestParam>& cmdParam, const char *buf)
+ResponsePtr GetCmd::process(const std::vector<RequestParam>& cmdParam)
 {
   if (cmdParam.size() != 2)
   {
     LOG_ERROR << "Get Commd syntax error!";
-    return ResponsePtr();
+    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'get' command"));
   }
 
   std::string key(cmdParam[1].start(), cmdParam[1].len());
@@ -76,19 +76,19 @@ ResponsePtr GetCmd::process(const std::vector<RequestParam>& cmdParam, const cha
   if (!val.get())
   {
     LOG_ERROR << "The val of key is nil!";
-    return ResponsePtr();
+    return ResponsePtr(new BulkResponse(NULL));
   }
 
   if (val->typeNmae() != std::string("string"))
   {
     LOG_ERROR << "Get Commd type error!";
-    return ResponsePtr();
+    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
   }
 
   boost::shared_ptr<StrObject> strObj = boost::static_pointer_cast<StrObject>(val);
   LOG_INFO << "The val is " << '"' << strObj->getStrObjVal() << '"';
 
-  return ResponsePtr();
+  return ResponsePtr(new BulkResponse(&(strObj->getStrObjVal())));
 }
 
 Cmd *GetCmd::clone() const

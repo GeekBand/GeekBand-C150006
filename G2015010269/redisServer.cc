@@ -5,6 +5,7 @@
 #include "redisServer.h"
 #include "redisCmd.h"
 #include "redisResp.h"
+#include "redisAllResp.h"
 
 namespace redis
 {
@@ -42,29 +43,29 @@ void RedisServer::onMessage(const muduo::net::TcpConnectionPtr& conn,
     {
       Request tmp;
       requestPtr->swap(tmp);
-      size_t end = tmp.curParsePos();
       tmp.dump();
 
+      std::string output;
       const std::vector<RequestParam>& allCmd = tmp.getReferenceOfAllParam();
-      if (allCmd.size() < 1)
+      std::string cmdName(allCmd[0].start(), allCmd[0].len());
+      const Cmd *prototype = Cmd::getPrototypeByName(cmdName);
+      if (prototype != NULL)
       {
-        conn->shutdown();
-        break;
+        Cmd* cmd = prototype->clone();
+        ResponsePtr rspPtr = cmd->process(allCmd);
+        rspPtr->serializeToString(&output);
       }
-      RequestParam cmdName = allCmd[0];
-      const Cmd *prototype = Cmd::getPrototypeByName(
-            std::string(cmdName.start(), cmdName.len()));
-      if (prototype == NULL)
+      else
       {
-        conn->shutdown();
-        break;
+        ErrResponse rsp("ERR", std::string("unknown command ") + "'" + cmdName + "'");
+        rsp.serializeToString(&output);
       }
-      Cmd* cmd = prototype->clone();
-      ResponsePtr rspPtr = cmd->process(allCmd, buf->peek());
-      muduo::net::Buffer sendbuf(rspPtr->size());
-      //rspPtr->serializeToArray();
+      conn->send(output);
+
+      //RequestParam保存有指向buffer的指针
+      //因此buffer最后释放
+      size_t end = tmp.curParsePos();
       buf->retrieveUntil(buf->peek() + end);
-      conn->send(std::string("+OK\r\n"));
     }
     else if (ret == Request::kParseErr)
     {
