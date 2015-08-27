@@ -2,6 +2,7 @@
 #define _REDISRESP_H_
 
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 namespace redis
 {
@@ -14,6 +15,8 @@ class Response
   virtual bool serializeToString(std::string* output) const = 0;
   virtual ~Response() { }
 };
+
+typedef boost::shared_ptr<Response> ResponsePtr;
 
 }
 

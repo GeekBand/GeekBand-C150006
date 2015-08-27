@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include <string>
+#include <vector>
 
 #include "redisResp.h"
 
@@ -63,6 +64,19 @@ class BulkResponse: public Response
   const std::string *val_;
   char lenStr[24];
   int lenBin;
+};
+
+class ArraysResponse: public Response
+{
+ public:
+  ArraysResponse(): totalDataLen_(0) { }
+  size_t size() const;
+  //size_t serializeToArray(char *data, size_t size) const;
+  bool serializeToString(std::string* output) const;
+  void addResp(const ResponsePtr& resp);
+ private:
+  std::vector<ResponsePtr> allResp_;
+  size_t totalDataLen_;
 };
 
 }

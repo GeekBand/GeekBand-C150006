@@ -22,8 +22,6 @@ size_t IntResponse::size() const
 
 bool IntResponse::serializeToString(std::string* output) const
 {
-  output->clear();
-
   output->push_back(':');
   *output += buf_;
   *output += "\r\n";
@@ -40,8 +38,6 @@ size_t SimpleStrResponse::size() const
 
 bool SimpleStrResponse::serializeToString(std::string* output) const
 {
-  output->clear();
-
   output->push_back('+');
   *output += str_;
   *output += "\r\n";
@@ -69,8 +65,6 @@ size_t ErrResponse::size() const
 
 bool ErrResponse::serializeToString(std::string* output) const
 {
-  output->clear();
-
   output->append("-");
   output->append(errType_);
   output->append(" ");
@@ -106,7 +100,6 @@ bool BulkResponse::serializeToString(std::string* output) const
 {
   if (val_ != NULL)
   {
-    output->clear();
     output->append("$");
     output->append(lenStr);
     output->append("\r\n");
@@ -119,6 +112,60 @@ bool BulkResponse::serializeToString(std::string* output) const
   }
 
   return true;
+}
+
+///////////////////////// resp of arrays begin ///////////////////////////////
+size_t ArraysResponse::ArraysResponse::size() const
+{
+  size_t size = 0;
+  if (allResp_.size() != 0)
+  {
+    char buf[64];
+    size = ::snprintf(buf, sizeof(buf), "%ld", allResp_.size());
+    //* + \r\n
+    size += (1 + 2);
+    size += totalDataLen_;
+  }
+  else
+  {
+    //*0\r\n
+    size = 4;
+  }
+
+  return size;
+}
+
+
+bool ArraysResponse::serializeToString(std::string* output) const
+{
+  if (allResp_.size() != 0)
+  {
+    output->append("*");
+
+    char buf[64];
+    ::snprintf(buf, sizeof(buf), "%ld", allResp_.size());
+    output->append(buf);
+
+    output->append("\r\n");
+
+    for (std::vector<ResponsePtr>::const_iterator ite = allResp_.begin();
+          ite != allResp_.end(); ++ite)
+    {
+      (*ite)->serializeToString(output);
+    }
+  }
+  else
+  {
+    output->append("*0\r\n");
+  }
+  return true;
+}
+
+void ArraysResponse::addResp(const ResponsePtr& resp)
+{
+  allResp_.push_back(resp);
+
+  totalDataLen_ += resp->size();
 }
 
 }

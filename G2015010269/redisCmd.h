@@ -4,15 +4,11 @@
 #include <string>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
-
 #include "redisRequest.h"
 #include "redisResp.h"
 
 namespace redis
 {
-
-typedef boost::shared_ptr<Response> ResponsePtr;
 
 class Cmd
 {
