@@ -20,6 +20,8 @@ class Database
   virtual ~Database() { }
 };
 
+typedef boost::shared_ptr<Database> DatabasePtr;
+
 }
 
 #endif

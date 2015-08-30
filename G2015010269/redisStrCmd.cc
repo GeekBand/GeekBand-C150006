@@ -5,13 +5,10 @@
 #include "redisStrObject.h"
 #include "redisMapDatabase.h"
 #include "redisAllResp.h"
+#include "redisDbManage.h"
 
 namespace redis
 {
-
-MapDatabase gMapDb;
-Database *db = &gMapDb;
-
 ///////////////////////// cmd of set begin ///////////////////////////////
 
 std::string SetCmd::name_("SET");
@@ -37,7 +34,9 @@ ResponsePtr SetCmd::process(const std::vector<RequestParam>& cmdParam)
 
   ObjectPtr strObj(new StrObject(cmdParam[2].start(), cmdParam[2].len()));
   std::string key(cmdParam[1].start(), cmdParam[1].len());
-  db->updateKeyValue(key, strObj);
+
+  DatabaseManage *dbm = DatabaseManage::getInstance();
+  dbm->updateKeyValue(key, strObj);
 
   return ResponsePtr(new SimpleStrResponse("OK"));
 }
@@ -71,7 +70,8 @@ ResponsePtr GetCmd::process(const std::vector<RequestParam>& cmdParam)
 
   std::string key(cmdParam[1].start(), cmdParam[1].len());
 
-  ObjectPtr val = db->queryKeyValue(key);
+  DatabaseManage *dbm = DatabaseManage::getInstance();
+  ObjectPtr val = dbm->queryKeyValue(key);
 
   if (!val.get())
   {
