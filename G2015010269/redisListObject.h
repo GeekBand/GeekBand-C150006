@@ -16,11 +16,13 @@ class ListObject: public Object
 
   size_t getSize() const { return list_.size(); }
 
-  //bool lpush();
-  //ObjectPtr lpop();
+  bool lpush(const ObjectPtr& obj);
+  ObjectPtr lpop();
 
-  //bool rpush();
-  //ObjectPtr rpop();
+  bool rpush(const ObjectPtr& obj);
+  ObjectPtr rpop();
+
+  size_t llen() { return list_.size(); }
  private:
   std::list<ObjectPtr> list_;
 
