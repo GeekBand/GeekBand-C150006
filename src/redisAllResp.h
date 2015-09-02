@@ -9,6 +9,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "redisResp.h"
+#include "redisStrObject.h"
 
 namespace redis
 {
@@ -57,12 +58,12 @@ class ErrResponse: public Response
 class BulkResponse: public Response
 {
  public:
-  BulkResponse(const std::string *str);
+  BulkResponse(const StrObjectPtr& strObj);
   size_t size() const;
   //size_t serializeToArray(char *data, size_t size) const;
   bool serializeToString(std::string* output) const;
  private:
-  const std::string *val_;
+  StrObjectPtr val_;
   char lenStr[24];
   int lenBin;
 };

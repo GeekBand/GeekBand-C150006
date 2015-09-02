@@ -75,12 +75,12 @@ bool ErrResponse::serializeToString(std::string* output) const
 }
 
 ///////////////////////// resp of bulk begin ///////////////////////////////
-BulkResponse::BulkResponse(const std::string *str)
-  :val_(str), lenBin(0)
+BulkResponse::BulkResponse(const StrObjectPtr& strObj)
+  :val_(strObj), lenBin(0)
 {
-  if (val_ != NULL)
+  if (strObj.get() != NULL)
   {
-    lenBin = snprintf(lenStr, sizeof(lenStr), "%lu", str->size());
+    lenBin = snprintf(lenStr, sizeof(lenStr), "%lu", strObj->getSize());
   }
 }
 
@@ -93,7 +93,7 @@ size_t BulkResponse::size() const
   }
 
   //$ + 2 * \r\n
-  return lenBin + val_->size() + 1 + 2 + 2;
+  return lenBin + val_->getSize() + 1 + 2 + 2;
 }
 
 bool BulkResponse::serializeToString(std::string* output) const
@@ -103,7 +103,7 @@ bool BulkResponse::serializeToString(std::string* output) const
     output->append("$");
     output->append(lenStr);
     output->append("\r\n");
-    output->append(*val_);
+    output->append(val_->getStrObjVal());
     output->append("\r\n");
   }
   else

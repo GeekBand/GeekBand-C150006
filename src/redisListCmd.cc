@@ -85,7 +85,7 @@ ResponsePtr LpopCmd::process(const std::vector<RequestParam>& cmdParam)
 
   if (!objPtr.get())
   {
-    return ResponsePtr(new BulkResponse(NULL));
+    return ResponsePtr(new BulkResponse(StrObjectPtr()));
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
@@ -95,8 +95,7 @@ ResponsePtr LpopCmd::process(const std::vector<RequestParam>& cmdParam)
     instance->deleteKeyValue(key);
   }
 
-  //fix me
-  return BulkResponsePtr();
+  return BulkResponsePtr(new BulkResponse(item));
 }
 
 }

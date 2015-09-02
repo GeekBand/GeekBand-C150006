@@ -76,7 +76,7 @@ ResponsePtr GetCmd::process(const std::vector<RequestParam>& cmdParam)
   if (!val.get())
   {
     LOG_ERROR << "The val of key is nil!";
-    return ResponsePtr(new BulkResponse(NULL));
+    return ResponsePtr(new BulkResponse(StrObjectPtr()));
   }
 
   if (val->typeNmae() != std::string("string"))
@@ -88,7 +88,7 @@ ResponsePtr GetCmd::process(const std::vector<RequestParam>& cmdParam)
   boost::shared_ptr<StrObject> strObj = boost::static_pointer_cast<StrObject>(val);
   LOG_INFO << "The val is " << '"' << strObj->getStrObjVal() << '"';
 
-  return ResponsePtr(new BulkResponse(&(strObj->getStrObjVal())));
+  return ResponsePtr(new BulkResponse(strObj));
 }
 
 Cmd *GetCmd::clone() const
