@@ -3,6 +3,7 @@
 
 #include <string>
 #include <list>
+#include <boost/shared_ptr.hpp>
 
 #include "redisObject.h"
 
@@ -28,6 +29,8 @@ class ListObject: public Object
 
   static std::string typeName_;
 };
+
+typedef boost::shared_ptr<ListObject> ListObjectPtr;
 
 }
 

@@ -2,6 +2,7 @@
 #define _REDISSTROBJECT_H_
 
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 #include "redisObject.h"
 
@@ -28,6 +29,8 @@ class StrObject: public Object
 
   static std::string typeName_;
 };
+
+typedef boost::shared_ptr<StrObject> StrObjectPtr;
 
 }
 

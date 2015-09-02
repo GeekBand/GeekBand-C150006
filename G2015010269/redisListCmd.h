@@ -1,0 +1,42 @@
+#ifndef _REDISLISTCMD_H_
+#define _REDISLISTCMD_H_
+
+#include "redisCmd.h"
+#include "redisRequest.h"
+
+namespace redis
+{
+
+//////////////////////////// cmd of lpush start /////////////////////////////
+class LpushCmd: public Cmd
+{
+ public:
+  Cmd *clone() const { return new LpushCmd(name_); }
+  ResponsePtr process(const std::vector<RequestParam>& cmdParam);
+  const std::string& typeName() const { return name_; }
+ private:
+  LpushCmd();
+  LpushCmd(const std::string& name);
+
+  static std::string name_;
+  static LpushCmd prototype_;
+};
+
+//////////////////////////// cmd of lpop start /////////////////////////////
+class LpopCmd: public Cmd
+{
+ public:
+  Cmd *clone() const { return new LpopCmd(name_); }
+  ResponsePtr process(const std::vector<RequestParam>& cmdParam);
+  const std::string& typeName() const { return name_; }
+ private:
+  LpopCmd();
+  LpopCmd(const std::string& name);
+
+  static std::string name_;
+  static LpopCmd prototype_;
+};
+
+}
+
+#endif

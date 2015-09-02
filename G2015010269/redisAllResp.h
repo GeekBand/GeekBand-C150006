@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 #include "redisResp.h"
 
@@ -79,6 +80,11 @@ class ArraysResponse: public Response
   size_t totalDataLen_;
 };
 
+typedef boost::shared_ptr<IntResponse>            IntResponsePtr;
+typedef boost::shared_ptr<SimpleStrResponse>      SimpleStrResponsePtr;
+typedef boost::shared_ptr<ErrResponse>            ErrResponsePtr;
+typedef boost::shared_ptr<BulkResponse>           BulkResponsePtr;
+typedef boost::shared_ptr<ArraysResponse>         ArraysResponsePtr;
 }
 
 #endif
