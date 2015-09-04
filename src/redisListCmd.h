@@ -82,7 +82,7 @@ class LlenCmd: public Cmd
   static LlenCmd prototype_;
 };
 
-//////////////////////////// cmd of lpop start /////////////////////////////
+//////////////////////////// cmd of lrange start /////////////////////////////
 class LrangeCmd: public Cmd
 {
  public:
@@ -95,6 +95,21 @@ class LrangeCmd: public Cmd
 
   static std::string name_;
   static LrangeCmd prototype_;
+};
+
+//////////////////////////// cmd of lrange start /////////////////////////////
+class LremCmd: public Cmd
+{
+ public:
+  Cmd *clone() const { return new LremCmd(name_); }
+  ResponsePtr process(const std::vector<RequestParam>& cmdParam);
+  const std::string& typeName() const { return name_; }
+ private:
+  LremCmd();
+  LremCmd(const std::string& name);
+
+  static std::string name_;
+  static LremCmd prototype_;
 };
 
 }

@@ -300,4 +300,34 @@ ResponsePtr LrangeCmd::process(const std::vector<RequestParam>& cmdParam)
   return ret;
 }
 
+///////////////////////// cmd of lrange begin ///////////////////////////////
+std::string LremCmd::name_("LREM");
+LremCmd LremCmd::prototype_;
+
+LremCmd::LremCmd()
+{
+  Cmd::addPrototype(name_, this);
+}
+
+LremCmd::LremCmd(const std::string& name)
+{
+  (void)name;
+}
+
+ResponsePtr LremCmd::process(const std::vector<RequestParam>& cmdParam)
+{
+  if (cmdParam.size() != 4)
+  {
+    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lrem' command"));
+  }
+
+  long long count = 0;
+  if (!convertStrToLongLong(cmdParam[2].start(), cmdParam[2].len(), &count))
+  {
+    return ResponsePtr(new ErrResponse("ERR", "value is not an integer or out of range"));
+  }
+
+  return ResponsePtr();
+}
+
 }
