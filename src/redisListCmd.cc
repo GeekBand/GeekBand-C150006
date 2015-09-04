@@ -196,4 +196,62 @@ ResponsePtr RpopCmd::process(const std::vector<RequestParam>& cmdParam)
   return BulkResponsePtr(new BulkResponse(item));
 }
 
+///////////////////////// cmd of llen begin ///////////////////////////////
+std::string LlenCmd::name_("LLEN");
+LlenCmd LlenCmd::prototype_;
+
+LlenCmd::LlenCmd()
+{
+  Cmd::addPrototype(name_, this);
+}
+
+LlenCmd::LlenCmd(const std::string& name)
+{
+  (void)name;
+}
+
+ResponsePtr LlenCmd::process(const std::vector<RequestParam>& cmdParam)
+{
+  if (cmdParam.size() != 2)
+  {
+    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'llen' command"));
+  }
+
+  std::string key(cmdParam[1].start(), cmdParam[1].len());
+  DatabaseManage *instance = DatabaseManage::getInstance();
+  ObjectPtr objPtr = instance->queryKeyValue(key);
+  if (!objPtr.get())
+  {
+    return ResponsePtr(new IntResponse(0));
+  }
+
+  if (objPtr->typeNmae() != "list")
+  {
+    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
+  }
+
+  ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
+
+  return ResponsePtr(new IntResponse(listPtr->llen()));
+}
+
+///////////////////////// cmd of lrange begin ///////////////////////////////
+std::string LrangeCmd::name_("LRANGE");
+LrangeCmd LrangeCmd::prototype_;
+
+LrangeCmd::LrangeCmd()
+{
+  Cmd::addPrototype(name_, this);
+}
+
+LrangeCmd::LrangeCmd(const std::string& name)
+{
+  (void)name;
+}
+
+ResponsePtr LrangeCmd::process(const std::vector<RequestParam>& cmdParam)
+{
+  return ResponsePtr();
+}
+
 }

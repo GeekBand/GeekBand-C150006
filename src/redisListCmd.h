@@ -67,6 +67,36 @@ class RpopCmd: public Cmd
   static RpopCmd prototype_;
 };
 
+//////////////////////////// cmd of lpop start /////////////////////////////
+class LlenCmd: public Cmd
+{
+ public:
+  Cmd *clone() const { return new LlenCmd(name_); }
+  ResponsePtr process(const std::vector<RequestParam>& cmdParam);
+  const std::string& typeName() const { return name_; }
+ private:
+  LlenCmd();
+  LlenCmd(const std::string& name);
+
+  static std::string name_;
+  static LlenCmd prototype_;
+};
+
+//////////////////////////// cmd of lpop start /////////////////////////////
+class LrangeCmd: public Cmd
+{
+ public:
+  Cmd *clone() const { return new LrangeCmd(name_); }
+  ResponsePtr process(const std::vector<RequestParam>& cmdParam);
+  const std::string& typeName() const { return name_; }
+ private:
+  LrangeCmd();
+  LrangeCmd(const std::string& name);
+
+  static std::string name_;
+  static LrangeCmd prototype_;
+};
+
 }
 
 #endif
