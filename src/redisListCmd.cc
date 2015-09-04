@@ -6,6 +6,7 @@
 #include "redisAllResp.h"
 #include "redisDbManage.h"
 #include "redisStrObject.h"
+#include "redisUtility.h"
 
 namespace redis
 {
@@ -251,7 +252,52 @@ LrangeCmd::LrangeCmd(const std::string& name)
 
 ResponsePtr LrangeCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  return ResponsePtr();
+  if (cmdParam.size() != 4)
+  {
+    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lrange' command"));
+  }
+
+  long long start = 0;
+  long long stop = 0;
+  if (!convertStrToLongLong(cmdParam[2].start(), cmdParam[2].len(), &start)
+     || !convertStrToLongLong(cmdParam[3].start(), cmdParam[3].len(), &stop))
+  {
+    return ResponsePtr(new ErrResponse("ERR", "value is not an integer or out of range"));
+  }
+
+  std::string key(cmdParam[1].start(), cmdParam[1].len());
+  DatabaseManage *instance = DatabaseManage::getInstance();
+  ObjectPtr objPtr = instance->queryKeyValue(key);
+  if (!objPtr.get())
+  {
+    return ResponsePtr(new ArraysResponse());
+  }
+
+  if (objPtr->typeNmae() != "list")
+  {
+    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
+  }
+
+  ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
+  start = start < 0 ? start + listPtr->llen() : start;
+  stop = stop < 0 ? stop + listPtr->llen() : stop;
+
+  if (start > stop)
+  {
+    return ResponsePtr(new ArraysResponse());
+  }
+
+  ListObject::ListObjConstIte startIte = listPtr->getIteratorByIdx(start);
+  ListObject::ListObjConstIte endIte = listPtr->getIteratorByIdx(stop + 1);
+
+  ArraysResponsePtr ret(new ArraysResponse());
+  for (ListObject::ListObjConstIte ite = startIte; ite != endIte; ++ite)
+  {
+    StrObjectPtr item = boost::static_pointer_cast<StrObject>(*ite);
+    ret->addResp(ResponsePtr(new BulkResponse(item)));
+  }
+
+  return ret;
 }
 
 }

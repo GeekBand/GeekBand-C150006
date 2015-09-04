@@ -45,4 +45,17 @@ ObjectPtr ListObject::rpop()
   return ret;
 }
 
+ListObject::ListObjConstIte ListObject::getIteratorByIdx(size_t idx)
+{
+  ListObjConstIte ite = list_.begin();
+  size_t i = 0;
+  while (i < idx && ite != list_.end())
+  {
+    ++i;
+    ++ite;
+  }
+
+  return ite;
+}
+
 }

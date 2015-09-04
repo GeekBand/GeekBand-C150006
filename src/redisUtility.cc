@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include "redisUtility.h"
 
@@ -10,8 +11,9 @@ namespace redis
 bool convertStrToLongLong(const char *str, long long *val)
 {
   char *endPtr = NULL;
+  errno = 0;
   long long tmp = strtoll(str, &endPtr, 10);
-  if (isspace(str[0]) || endPtr != '\0' || errno == ERANGE)
+  if (isspace(str[0]) || *endPtr != '\0' || errno == ERANGE)
   {
     return false;
   }
