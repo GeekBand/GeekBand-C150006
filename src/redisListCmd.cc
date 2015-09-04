@@ -95,7 +95,7 @@ ResponsePtr LpopCmd::process(const std::vector<RequestParam>& cmdParam)
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
-  StrObjectPtr item = boost::static_pointer_cast<StrObject>(listPtr->lpop());
+  StrObjectPtr item = listPtr->lpop();
   if (listPtr->llen() == 0)
   {
     instance->deleteKeyValue(key);
@@ -188,7 +188,7 @@ ResponsePtr RpopCmd::process(const std::vector<RequestParam>& cmdParam)
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
-  StrObjectPtr item = boost::static_pointer_cast<StrObject>(listPtr->rpop());
+  StrObjectPtr item = listPtr->rpop();
   if (listPtr->llen() == 0)
   {
     instance->deleteKeyValue(key);
@@ -293,7 +293,7 @@ ResponsePtr LrangeCmd::process(const std::vector<RequestParam>& cmdParam)
   ArraysResponsePtr ret(new ArraysResponse());
   for (ListObject::ListObjConstIte ite = startIte; ite != endIte; ++ite)
   {
-    StrObjectPtr item = boost::static_pointer_cast<StrObject>(*ite);
+    StrObjectPtr item = *ite;
     ret->addResp(ResponsePtr(new BulkResponse(item)));
   }
 

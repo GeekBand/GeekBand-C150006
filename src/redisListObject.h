@@ -5,7 +5,7 @@
 #include <list>
 #include <boost/shared_ptr.hpp>
 
-#include "redisObject.h"
+#include "redisStrObject.h"
 
 namespace redis
 {
@@ -13,23 +13,23 @@ namespace redis
 class ListObject: public Object
 {
  public:
-  typedef std::list<ObjectPtr>::const_iterator ListObjConstIte;
+  typedef std::list<StrObjectPtr>::const_iterator ListObjConstIte;
 
   const std::string& typeNmae() const { return typeName_; }
 
   size_t getSize() const { return list_.size(); }
 
-  bool lpush(const ObjectPtr& obj);
-  ObjectPtr lpop();
+  bool lpush(const StrObjectPtr& obj);
+  StrObjectPtr lpop();
 
-  bool rpush(const ObjectPtr& obj);
-  ObjectPtr rpop();
+  bool rpush(const StrObjectPtr& obj);
+  StrObjectPtr rpop();
 
   size_t llen() { return list_.size(); }
 
   ListObjConstIte getIteratorByIdx(size_t idx);
  private:
-  std::list<ObjectPtr> list_;
+  std::list<StrObjectPtr> list_;
 
   static std::string typeName_;
 };
