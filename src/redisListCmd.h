@@ -18,6 +18,8 @@ class LpushCmd: public Cmd
   LpushCmd();
   LpushCmd(const std::string& name);
 
+  static bool paramNumCheck(size_t num) { return num > 2; }
+
   static std::string name_;
   static LpushCmd prototype_;
 };
@@ -32,6 +34,8 @@ class LpopCmd: public Cmd
  private:
   LpopCmd();
   LpopCmd(const std::string& name);
+
+  static bool paramNumCheck(size_t num) { return num == 2; }
 
   static std::string name_;
   static LpopCmd prototype_;
@@ -48,6 +52,8 @@ class RpushCmd: public Cmd
   RpushCmd();
   RpushCmd(const std::string& name);
 
+  static bool paramNumCheck(size_t num) { return num > 2; }
+
   static std::string name_;
   static RpushCmd prototype_;
 };
@@ -62,6 +68,8 @@ class RpopCmd: public Cmd
  private:
   RpopCmd();
   RpopCmd(const std::string& name);
+
+  static bool paramNumCheck(size_t num) { return num == 2; }
 
   static std::string name_;
   static RpopCmd prototype_;
@@ -78,6 +86,8 @@ class LlenCmd: public Cmd
   LlenCmd();
   LlenCmd(const std::string& name);
 
+  static bool paramNumCheck(size_t num) { return num == 2; }
+
   static std::string name_;
   static LlenCmd prototype_;
 };
@@ -93,6 +103,8 @@ class LrangeCmd: public Cmd
   LrangeCmd();
   LrangeCmd(const std::string& name);
 
+  static bool paramNumCheck(size_t num) { return num == 4; }
+
   static std::string name_;
   static LrangeCmd prototype_;
 };
@@ -107,6 +119,8 @@ class LremCmd: public Cmd
  private:
   LremCmd();
   LremCmd(const std::string& name);
+
+  static bool paramNumCheck(size_t num) { return num == 4; }
 
   static std::string name_;
   static LremCmd prototype_;

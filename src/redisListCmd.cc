@@ -27,19 +27,15 @@ LpushCmd::LpushCmd(const std::string& name)
 
 ResponsePtr LpushCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() <= 2)
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lpush' command"));
+    return paramCheckRsp;
   }
 
   std::string key(cmdParam[1].start(), cmdParam[1].len());
   DatabaseManage *instance = DatabaseManage::getInstance();
   ObjectPtr objPtr = instance->queryKeyValue(key);
-
-  if (objPtr.get() && objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
-  }
 
   ListObjectPtr listPtr = objPtr.get() ? boost::static_pointer_cast<ListObject>(objPtr)
                                        : ListObjectPtr(new ListObject());
@@ -75,9 +71,10 @@ LpopCmd::LpopCmd(const std::string& name)
 
 ResponsePtr LpopCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() != 2)
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lpop' command"));
+    return paramCheckRsp;
   }
 
   std::string key(cmdParam[1].start(), cmdParam[1].len());
@@ -87,11 +84,6 @@ ResponsePtr LpopCmd::process(const std::vector<RequestParam>& cmdParam)
   if (!objPtr.get())
   {
     return ResponsePtr(new BulkResponse(StrObjectPtr()));
-  }
-
-  if (objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
@@ -120,19 +112,15 @@ RpushCmd::RpushCmd(const std::string& name)
 
 ResponsePtr RpushCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() <= 2)
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lpush' command"));
+    return paramCheckRsp;
   }
 
   std::string key(cmdParam[1].start(), cmdParam[1].len());
   DatabaseManage *instance = DatabaseManage::getInstance();
   ObjectPtr objPtr = instance->queryKeyValue(key);
-
-  if (objPtr.get() && objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
-  }
 
   ListObjectPtr listPtr = objPtr.get() ? boost::static_pointer_cast<ListObject>(objPtr)
                                        : ListObjectPtr(new ListObject());
@@ -168,9 +156,10 @@ RpopCmd::RpopCmd(const std::string& name)
 
 ResponsePtr RpopCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() != 2)
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lpop' command"));
+    return paramCheckRsp;
   }
 
   std::string key(cmdParam[1].start(), cmdParam[1].len());
@@ -180,11 +169,6 @@ ResponsePtr RpopCmd::process(const std::vector<RequestParam>& cmdParam)
   if (!objPtr.get())
   {
     return ResponsePtr(new BulkResponse(StrObjectPtr()));
-  }
-
-  if (objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
@@ -213,9 +197,10 @@ LlenCmd::LlenCmd(const std::string& name)
 
 ResponsePtr LlenCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() != 2)
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'llen' command"));
+    return paramCheckRsp;
   }
 
   std::string key(cmdParam[1].start(), cmdParam[1].len());
@@ -224,11 +209,6 @@ ResponsePtr LlenCmd::process(const std::vector<RequestParam>& cmdParam)
   if (!objPtr.get())
   {
     return ResponsePtr(new IntResponse(0));
-  }
-
-  if (objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
@@ -252,9 +232,10 @@ LrangeCmd::LrangeCmd(const std::string& name)
 
 ResponsePtr LrangeCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() != 4)
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lrange' command"));
+    return paramCheckRsp;
   }
 
   long long start = 0;
@@ -271,11 +252,6 @@ ResponsePtr LrangeCmd::process(const std::vector<RequestParam>& cmdParam)
   if (!objPtr.get())
   {
     return ResponsePtr(new ArraysResponse());
-  }
-
-  if (objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
@@ -316,9 +292,10 @@ LremCmd::LremCmd(const std::string& name)
 
 ResponsePtr LremCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() != 4)
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lrem' command"));
+    return paramCheckRsp;
   }
 
   long long count = 0;
@@ -333,11 +310,6 @@ ResponsePtr LremCmd::process(const std::vector<RequestParam>& cmdParam)
   if (!objPtr.get())
   {
     return ResponsePtr(new IntResponse(0));
-  }
-
-  if (objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);

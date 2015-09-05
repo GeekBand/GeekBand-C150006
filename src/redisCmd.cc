@@ -5,6 +5,8 @@
 #include <algorithm>
 
 #include "redisCmd.h"
+#include "redisAllResp.h"
+#include "redisDbManage.h"
 
 namespace redis
 {
@@ -44,6 +46,43 @@ const Cmd* Cmd::getPrototypeByName(const std::string& typeName)
   }
 
   return ret;
+}
+
+ResponsePtr Cmd::checkTypeAndParamNum(const std::vector<RequestParam>& cmdParam,
+                                      const ParamNumCheckFunc& cb, const std::string& type)
+{
+  ResponsePtr numCheckRsp = checkParamNum(cmdParam, cb);
+  if (numCheckRsp.get())
+  {
+    return numCheckRsp;
+  }
+
+  DatabaseManage *dbm = DatabaseManage::getInstance();
+  ObjectPtr obj = dbm->queryKeyValue(std::string(cmdParam[1].start(), cmdParam[1].len()));
+  if (obj.get() && obj->typeNmae() != type)
+  {
+    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
+  }
+
+  return ResponsePtr();
+}
+
+ResponsePtr Cmd::checkParamNum(const std::vector<RequestParam>& cmdParam,
+                               const ParamNumCheckFunc& cb)
+{
+  std::string cmd(cmdParam[0].start(), cmdParam[0].len());
+  if (!cb(cmdParam.size()))
+  {
+    std::string lowerCmd;
+    std::transform(cmd.begin(), cmd.end(),
+                   std::back_inserter(lowerCmd), ::tolower);
+    std::string content("wrong number of arguments for '");
+    content.append(lowerCmd);
+    content.append("' command");
+    return ResponsePtr(new ErrResponse("ERR", content));
+  }
+
+  return ResponsePtr();
 }
 
 }
