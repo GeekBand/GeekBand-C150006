@@ -13,6 +13,7 @@ namespace redis
 class ListObject: public Object
 {
  public:
+  typedef std::list<StrObjectPtr>::iterator ListObjIte;
   typedef std::list<StrObjectPtr>::const_iterator ListObjConstIte;
 
   const std::string& typeNmae() const { return typeName_; }
@@ -27,7 +28,9 @@ class ListObject: public Object
 
   size_t llen() { return list_.size(); }
 
-  ListObjConstIte getIteratorByIdx(size_t idx);
+  ListObjIte getIteratorByIdx(size_t idx);
+  int remove(const std::string& val, int num);
+  int remove_reverse(const std::string& val, int num);
  private:
   std::list<StrObjectPtr> list_;
 

@@ -45,9 +45,9 @@ StrObjectPtr ListObject::rpop()
   return ret;
 }
 
-ListObject::ListObjConstIte ListObject::getIteratorByIdx(size_t idx)
+ListObject::ListObjIte ListObject::getIteratorByIdx(size_t idx)
 {
-  ListObjConstIte ite = list_.begin();
+  ListObjIte ite = list_.begin();
   size_t i = 0;
   while (i < idx && ite != list_.end())
   {
@@ -56,6 +56,46 @@ ListObject::ListObjConstIte ListObject::getIteratorByIdx(size_t idx)
   }
 
   return ite;
+}
+
+int ListObject::remove(const std::string& val, int num)
+{
+  int counter = 0;
+  ListObjIte ite = list_.begin();
+  while (ite != list_.end() && counter < num)
+  {
+    if ((*ite)->getStrObjVal() == val)
+    {
+      ite = list_.erase(ite);
+      counter++;
+    }
+    else
+    {
+      ++ite;
+    }
+  }
+
+  return counter;
+}
+
+int ListObject::remove_reverse(const std::string& val, int num)
+{
+  int counter = 0;
+  std::list<StrObjectPtr>::reverse_iterator rite = list_.rbegin();
+  while (rite != list_.rend() && counter < num)
+  {
+    if ((*rite)->getStrObjVal() == val)
+    {
+      list_.erase((++rite).base());
+      counter++;
+    }
+    else
+    {
+      ++rite;
+    }
+  }
+
+  return counter;
 }
 
 }

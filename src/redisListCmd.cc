@@ -287,11 +287,11 @@ ResponsePtr LrangeCmd::process(const std::vector<RequestParam>& cmdParam)
     return ResponsePtr(new ArraysResponse());
   }
 
-  ListObject::ListObjConstIte startIte = listPtr->getIteratorByIdx(start);
-  ListObject::ListObjConstIte endIte = listPtr->getIteratorByIdx(stop + 1);
+  ListObject::ListObjIte startIte = listPtr->getIteratorByIdx(start);
+  ListObject::ListObjIte endIte = listPtr->getIteratorByIdx(stop + 1);
 
   ArraysResponsePtr ret(new ArraysResponse());
-  for (ListObject::ListObjConstIte ite = startIte; ite != endIte; ++ite)
+  for (ListObject::ListObjIte ite = startIte; ite != endIte; ++ite)
   {
     StrObjectPtr item = *ite;
     ret->addResp(ResponsePtr(new BulkResponse(item)));
@@ -327,7 +327,41 @@ ResponsePtr LremCmd::process(const std::vector<RequestParam>& cmdParam)
     return ResponsePtr(new ErrResponse("ERR", "value is not an integer or out of range"));
   }
 
-  return ResponsePtr();
+  std::string key(cmdParam[1].start(), cmdParam[1].len());
+  DatabaseManage *instance = DatabaseManage::getInstance();
+  ObjectPtr objPtr = instance->queryKeyValue(key);
+  if (!objPtr.get())
+  {
+    return ResponsePtr(new IntResponse(0));
+  }
+
+  if (objPtr->typeNmae() != "list")
+  {
+    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
+  }
+
+  ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
+  std::string val(cmdParam[3].start(), cmdParam[3].len());
+  int ret = 0;
+  if (count > 0)
+  {
+    ret = listPtr->remove(val, count);
+  }
+  else if (count < 0)
+  {
+    ret = listPtr->remove_reverse(val, -count);
+  }
+  else
+  {
+    ret = listPtr->remove(val, listPtr->llen());
+  }
+
+  if (listPtr->llen() == 0)
+  {
+    instance->deleteKeyValue(key);
+  }
+
+  return ResponsePtr(new IntResponse(ret));
 }
 
 }
