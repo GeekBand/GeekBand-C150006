@@ -3,6 +3,7 @@
 #include <ctype.h>
 
 #include <algorithm>
+#include <sstream>
 
 #include "redisCmd.h"
 #include "redisAllResp.h"
@@ -18,15 +19,15 @@ void Cmd::addPrototype(const std::string& typeName, Cmd* cmd)
   std::string upperStr;
   std::transform(typeName.begin(), typeName.end(),
                  std::back_inserter(upperStr), ::toupper);
+  std::istringstream iss(upperStr);
+  std::string cmdName;
+  while (iss >> cmdName)
+  {
+    if (prototypeMap_.find(cmdName) == prototypeMap_.end())
+    {
+      prototypeMap_[cmdName] = cmd;
+    }
 
-  if (prototypeMap_.find(upperStr) == prototypeMap_.end())
-  {
-    prototypeMap_[upperStr] = cmd;
-  }
-  else
-  {
-    ::fprintf(stderr, "Duplicate name - %s\n", typeName.c_str());
-    ::exit(-1);
   }
 }
 

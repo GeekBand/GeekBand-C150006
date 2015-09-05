@@ -1,3 +1,5 @@
+#include <strings.h>
+
 #include <boost/shared_ptr.hpp>
 #include <muduo/base/Logging.h>
 
@@ -11,21 +13,21 @@
 namespace redis
 {
 
-///////////////////////// cmd of lpush begin ///////////////////////////////
-std::string LpushCmd::name_("LPUSH");
-LpushCmd LpushCmd::prototype_;
+///////////////////////// cmd of push begin ///////////////////////////////
+std::string PushCmd::name_("LPUSH RPUSH");
+PushCmd PushCmd::prototype_;
 
-LpushCmd::LpushCmd()
+PushCmd::PushCmd()
 {
   Cmd::addPrototype(name_, this);
 }
 
-LpushCmd::LpushCmd(const std::string& name)
+PushCmd::PushCmd(const std::string& name)
 {
   (void)name;
 }
 
-ResponsePtr LpushCmd::process(const std::vector<RequestParam>& cmdParam)
+ResponsePtr PushCmd::process(const std::vector<RequestParam>& cmdParam)
 {
   ObjectPtr objPtr;
   ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
@@ -41,7 +43,15 @@ ResponsePtr LpushCmd::process(const std::vector<RequestParam>& cmdParam)
   for (size_t i = 2; i < cmdParam.size(); i++)
   {
     StrObjectPtr item(new StrObject(cmdParam[i].start(), cmdParam[i].len()));
-    listPtr->lpush(item);
+    std::string cmd(cmdParam[0].start(), cmdParam[0].len());
+    if (::strcasecmp(cmd.c_str(), "LPUSH") == 0)
+    {
+      listPtr->lpush(item);
+    }
+    else
+    {
+      listPtr->rpush(item);
+    }
   }
 
   if (objPtr.get() == NULL)
@@ -54,21 +64,21 @@ ResponsePtr LpushCmd::process(const std::vector<RequestParam>& cmdParam)
   return IntResponsePtr(new IntResponse(listPtr->llen()));
 }
 
-///////////////////////// cmd of lpop begin ///////////////////////////////
-std::string LpopCmd::name_("LPOP");
-LpopCmd LpopCmd::prototype_;
+///////////////////////// cmd of pop begin ///////////////////////////////
+std::string PopCmd::name_("LPOP RPOP");
+PopCmd PopCmd::prototype_;
 
-LpopCmd::LpopCmd()
+PopCmd::PopCmd()
 {
   Cmd::addPrototype(name_, this);
 }
 
-LpopCmd::LpopCmd(const std::string& name)
+PopCmd::PopCmd(const std::string& name)
 {
   (void)name;
 }
 
-ResponsePtr LpopCmd::process(const std::vector<RequestParam>& cmdParam)
+ResponsePtr PopCmd::process(const std::vector<RequestParam>& cmdParam)
 {
   ObjectPtr objPtr;
   ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
@@ -84,90 +94,9 @@ ResponsePtr LpopCmd::process(const std::vector<RequestParam>& cmdParam)
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
-  StrObjectPtr item = listPtr->lpop();
-  if (listPtr->llen() == 0)
-  {
-    std::string key(cmdParam[1].start(), cmdParam[1].len());
-    DatabaseManage::getInstance()->deleteKeyValue(key);
-  }
-
-  return BulkResponsePtr(new BulkResponse(item));
-}
-
-///////////////////////// cmd of rpush begin ///////////////////////////////
-std::string RpushCmd::name_("RPUSH");
-RpushCmd RpushCmd::prototype_;
-
-RpushCmd::RpushCmd()
-{
-  Cmd::addPrototype(name_, this);
-}
-
-RpushCmd::RpushCmd(const std::string& name)
-{
-  (void)name;
-}
-
-ResponsePtr RpushCmd::process(const std::vector<RequestParam>& cmdParam)
-{
-  ObjectPtr objPtr;
-  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
-                                                   "list", &objPtr);
-  if (paramCheckRsp.get())
-  {
-    return paramCheckRsp;
-  }
-
-  ListObjectPtr listPtr = objPtr.get() ? boost::static_pointer_cast<ListObject>(objPtr)
-                                       : ListObjectPtr(new ListObject());
-
-  for (size_t i = 2; i < cmdParam.size(); i++)
-  {
-    StrObjectPtr item(new StrObject(cmdParam[i].start(), cmdParam[i].len()));
-    listPtr->rpush(item);
-  }
-
-  if (objPtr.get() == NULL)
-  {
-    std::string key(cmdParam[1].start(), cmdParam[1].len());
-    DatabaseManage::getInstance()->updateKeyValue(key, listPtr);
-  }
-
-
-  return IntResponsePtr(new IntResponse(listPtr->llen()));
-}
-
-///////////////////////// cmd of lpop begin ///////////////////////////////
-std::string RpopCmd::name_("RPOP");
-RpopCmd RpopCmd::prototype_;
-
-RpopCmd::RpopCmd()
-{
-  Cmd::addPrototype(name_, this);
-}
-
-RpopCmd::RpopCmd(const std::string& name)
-{
-  (void)name;
-}
-
-ResponsePtr RpopCmd::process(const std::vector<RequestParam>& cmdParam)
-{
-  ObjectPtr objPtr;
-  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
-                                                   "list", &objPtr);
-  if (paramCheckRsp.get())
-  {
-    return paramCheckRsp;
-  }
-
-  if (!objPtr.get())
-  {
-    return ResponsePtr(new BulkResponse(StrObjectPtr()));
-  }
-
-  ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
-  StrObjectPtr item = listPtr->rpop();
+  std::string cmd(cmdParam[0].start(), cmdParam[0].len());
+  StrObjectPtr item = (::strcasecmp(cmd.c_str(), "LPOP") == 0) ?
+                      listPtr->lpop() : listPtr->rpop();
   if (listPtr->llen() == 0)
   {
     std::string key(cmdParam[1].start(), cmdParam[1].len());
