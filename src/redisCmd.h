@@ -8,6 +8,7 @@
 #include "redisRequest.h"
 #include "redisResp.h"
 #include "redisRequest.h"
+#include "redisObject.h"
 
 namespace redis
 {
@@ -25,7 +26,8 @@ class Cmd
   static void addPrototype(const std::string& typeName, Cmd* cmd);
   static const Cmd* getPrototypeByName(const std::string& name);
   static ResponsePtr checkTypeAndParamNum(const std::vector<RequestParam>& cmdParam,
-                                          const ParamNumCheckFunc& cb, const std::string& type);
+                                          const ParamNumCheckFunc& cb, const std::string& type,
+                                          ObjectPtr *pObj);
   static ResponsePtr checkParamNum(const std::vector<RequestParam>& cmdParam,
                                    const ParamNumCheckFunc& cb);
  private:

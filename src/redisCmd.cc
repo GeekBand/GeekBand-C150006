@@ -49,7 +49,8 @@ const Cmd* Cmd::getPrototypeByName(const std::string& typeName)
 }
 
 ResponsePtr Cmd::checkTypeAndParamNum(const std::vector<RequestParam>& cmdParam,
-                                      const ParamNumCheckFunc& cb, const std::string& type)
+                                      const ParamNumCheckFunc& cb, const std::string& type,
+                                      ObjectPtr *pObj)
 {
   ResponsePtr numCheckRsp = checkParamNum(cmdParam, cb);
   if (numCheckRsp.get())
@@ -59,6 +60,7 @@ ResponsePtr Cmd::checkTypeAndParamNum(const std::vector<RequestParam>& cmdParam,
 
   DatabaseManage *dbm = DatabaseManage::getInstance();
   ObjectPtr obj = dbm->queryKeyValue(std::string(cmdParam[1].start(), cmdParam[1].len()));
+  *pObj = obj;
   if (obj.get() && obj->typeNmae() != type)
   {
     return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));

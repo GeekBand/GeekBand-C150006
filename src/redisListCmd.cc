@@ -27,15 +27,13 @@ LpushCmd::LpushCmd(const std::string& name)
 
 ResponsePtr LpushCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
   if (paramCheckRsp.get())
   {
     return paramCheckRsp;
   }
-
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
 
   ListObjectPtr listPtr = objPtr.get() ? boost::static_pointer_cast<ListObject>(objPtr)
                                        : ListObjectPtr(new ListObject());
@@ -48,7 +46,8 @@ ResponsePtr LpushCmd::process(const std::vector<RequestParam>& cmdParam)
 
   if (objPtr.get() == NULL)
   {
-    instance->updateKeyValue(key, listPtr);
+    std::string key(cmdParam[1].start(), cmdParam[1].len());
+    DatabaseManage::getInstance()->updateKeyValue(key, listPtr);
   }
 
 
@@ -71,15 +70,13 @@ LpopCmd::LpopCmd(const std::string& name)
 
 ResponsePtr LpopCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
   if (paramCheckRsp.get())
   {
     return paramCheckRsp;
   }
-
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
 
   if (!objPtr.get())
   {
@@ -90,7 +87,8 @@ ResponsePtr LpopCmd::process(const std::vector<RequestParam>& cmdParam)
   StrObjectPtr item = listPtr->lpop();
   if (listPtr->llen() == 0)
   {
-    instance->deleteKeyValue(key);
+    std::string key(cmdParam[1].start(), cmdParam[1].len());
+    DatabaseManage::getInstance()->deleteKeyValue(key);
   }
 
   return BulkResponsePtr(new BulkResponse(item));
@@ -112,15 +110,13 @@ RpushCmd::RpushCmd(const std::string& name)
 
 ResponsePtr RpushCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
   if (paramCheckRsp.get())
   {
     return paramCheckRsp;
   }
-
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
 
   ListObjectPtr listPtr = objPtr.get() ? boost::static_pointer_cast<ListObject>(objPtr)
                                        : ListObjectPtr(new ListObject());
@@ -133,7 +129,8 @@ ResponsePtr RpushCmd::process(const std::vector<RequestParam>& cmdParam)
 
   if (objPtr.get() == NULL)
   {
-    instance->updateKeyValue(key, listPtr);
+    std::string key(cmdParam[1].start(), cmdParam[1].len());
+    DatabaseManage::getInstance()->updateKeyValue(key, listPtr);
   }
 
 
@@ -156,15 +153,13 @@ RpopCmd::RpopCmd(const std::string& name)
 
 ResponsePtr RpopCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
   if (paramCheckRsp.get())
   {
     return paramCheckRsp;
   }
-
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
 
   if (!objPtr.get())
   {
@@ -175,7 +170,8 @@ ResponsePtr RpopCmd::process(const std::vector<RequestParam>& cmdParam)
   StrObjectPtr item = listPtr->rpop();
   if (listPtr->llen() == 0)
   {
-    instance->deleteKeyValue(key);
+    std::string key(cmdParam[1].start(), cmdParam[1].len());
+    DatabaseManage::getInstance()->deleteKeyValue(key);
   }
 
   return BulkResponsePtr(new BulkResponse(item));
@@ -197,15 +193,14 @@ LlenCmd::LlenCmd(const std::string& name)
 
 ResponsePtr LlenCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
   if (paramCheckRsp.get())
   {
     return paramCheckRsp;
   }
 
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
   if (!objPtr.get())
   {
     return ResponsePtr(new IntResponse(0));
@@ -232,7 +227,9 @@ LrangeCmd::LrangeCmd(const std::string& name)
 
 ResponsePtr LrangeCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
   if (paramCheckRsp.get())
   {
     return paramCheckRsp;
@@ -246,9 +243,6 @@ ResponsePtr LrangeCmd::process(const std::vector<RequestParam>& cmdParam)
     return ResponsePtr(new ErrResponse("ERR", "value is not an integer or out of range"));
   }
 
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
   if (!objPtr.get())
   {
     return ResponsePtr(new ArraysResponse());
@@ -292,7 +286,9 @@ LremCmd::LremCmd(const std::string& name)
 
 ResponsePtr LremCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck, "list");
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
   if (paramCheckRsp.get())
   {
     return paramCheckRsp;
@@ -304,9 +300,6 @@ ResponsePtr LremCmd::process(const std::vector<RequestParam>& cmdParam)
     return ResponsePtr(new ErrResponse("ERR", "value is not an integer or out of range"));
   }
 
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
   if (!objPtr.get())
   {
     return ResponsePtr(new IntResponse(0));
@@ -330,7 +323,8 @@ ResponsePtr LremCmd::process(const std::vector<RequestParam>& cmdParam)
 
   if (listPtr->llen() == 0)
   {
-    instance->deleteKeyValue(key);
+    std::string key(cmdParam[1].start(), cmdParam[1].len());
+    DatabaseManage::getInstance()->deleteKeyValue(key);
   }
 
   return ResponsePtr(new IntResponse(ret));
