@@ -11,10 +11,15 @@ RMFLAGS = -rf
 CPP = g++
 CC = gcc
 
-DIR_LIBS = ../muduo/lib 
-LINK_LIBS = -lmuduo_net -lmuduo_base -lpthread
+ifeq ($(ver),64)
+DIR_LIBS = ../muduo_x64/lib 
+INCLUDE_DIRS = -I../muduo_x64/include
+else
+DIR_LIBS = ../muduo_x86/lib 
+INCLUDE_DIRS = -I../muduo_x86/include
+endif
 
-INCLUDE_DIRS = -I../muduo/include
+LINK_LIBS = -lmuduo_net -lmuduo_base -lpthread
 
 CFLAGS = -Wall -gdwarf-2 -g3 -O0 $(INCLUDE_DIRS)
 
