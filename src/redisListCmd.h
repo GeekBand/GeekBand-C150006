@@ -8,63 +8,37 @@ namespace redis
 {
 
 //////////////////////////// cmd of lpush start /////////////////////////////
-class LpushCmd: public Cmd
+class PushCmd: public Cmd
 {
  public:
-  Cmd *clone() const { return new LpushCmd(name_); }
+  Cmd *clone() const { return new PushCmd(name_); }
   ResponsePtr process(const std::vector<RequestParam>& cmdParam);
   const std::string& typeName() const { return name_; }
  private:
-  LpushCmd();
-  LpushCmd(const std::string& name);
+  PushCmd();
+  PushCmd(const std::string& name);
+
+  static bool paramNumCheck(size_t num) { return num > 2; }
 
   static std::string name_;
-  static LpushCmd prototype_;
+  static PushCmd prototype_;
 };
 
 //////////////////////////// cmd of lpop start /////////////////////////////
-class LpopCmd: public Cmd
+class PopCmd: public Cmd
 {
  public:
-  Cmd *clone() const { return new LpopCmd(name_); }
+  Cmd *clone() const { return new PopCmd(name_); }
   ResponsePtr process(const std::vector<RequestParam>& cmdParam);
   const std::string& typeName() const { return name_; }
  private:
-  LpopCmd();
-  LpopCmd(const std::string& name);
+  PopCmd();
+  PopCmd(const std::string& name);
+
+  static bool paramNumCheck(size_t num) { return num == 2; }
 
   static std::string name_;
-  static LpopCmd prototype_;
-};
-
-//////////////////////////// cmd of lpush start /////////////////////////////
-class RpushCmd: public Cmd
-{
- public:
-  Cmd *clone() const { return new RpushCmd(name_); }
-  ResponsePtr process(const std::vector<RequestParam>& cmdParam);
-  const std::string& typeName() const { return name_; }
- private:
-  RpushCmd();
-  RpushCmd(const std::string& name);
-
-  static std::string name_;
-  static RpushCmd prototype_;
-};
-
-//////////////////////////// cmd of lpop start /////////////////////////////
-class RpopCmd: public Cmd
-{
- public:
-  Cmd *clone() const { return new RpopCmd(name_); }
-  ResponsePtr process(const std::vector<RequestParam>& cmdParam);
-  const std::string& typeName() const { return name_; }
- private:
-  RpopCmd();
-  RpopCmd(const std::string& name);
-
-  static std::string name_;
-  static RpopCmd prototype_;
+  static PopCmd prototype_;
 };
 
 //////////////////////////// cmd of lpop start /////////////////////////////
@@ -77,6 +51,8 @@ class LlenCmd: public Cmd
  private:
   LlenCmd();
   LlenCmd(const std::string& name);
+
+  static bool paramNumCheck(size_t num) { return num == 2; }
 
   static std::string name_;
   static LlenCmd prototype_;
@@ -93,6 +69,8 @@ class LrangeCmd: public Cmd
   LrangeCmd();
   LrangeCmd(const std::string& name);
 
+  static bool paramNumCheck(size_t num) { return num == 4; }
+
   static std::string name_;
   static LrangeCmd prototype_;
 };
@@ -107,6 +85,8 @@ class LremCmd: public Cmd
  private:
   LremCmd();
   LremCmd(const std::string& name);
+
+  static bool paramNumCheck(size_t num) { return num == 4; }
 
   static std::string name_;
   static LremCmd prototype_;

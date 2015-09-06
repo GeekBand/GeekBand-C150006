@@ -1,3 +1,5 @@
+#include <strings.h>
+
 #include <boost/shared_ptr.hpp>
 #include <muduo/base/Logging.h>
 
@@ -11,34 +13,28 @@
 namespace redis
 {
 
-///////////////////////// cmd of lpush begin ///////////////////////////////
-std::string LpushCmd::name_("LPUSH");
-LpushCmd LpushCmd::prototype_;
+///////////////////////// cmd of push begin ///////////////////////////////
+std::string PushCmd::name_("LPUSH RPUSH");
+PushCmd PushCmd::prototype_;
 
-LpushCmd::LpushCmd()
+PushCmd::PushCmd()
 {
   Cmd::addPrototype(name_, this);
 }
 
-LpushCmd::LpushCmd(const std::string& name)
+PushCmd::PushCmd(const std::string& name)
 {
   (void)name;
 }
 
-ResponsePtr LpushCmd::process(const std::vector<RequestParam>& cmdParam)
+ResponsePtr PushCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() <= 2)
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lpush' command"));
-  }
-
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
-
-  if (objPtr.get() && objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
+    return paramCheckRsp;
   }
 
   ListObjectPtr listPtr = objPtr.get() ? boost::static_pointer_cast<ListObject>(objPtr)
@@ -47,151 +43,64 @@ ResponsePtr LpushCmd::process(const std::vector<RequestParam>& cmdParam)
   for (size_t i = 2; i < cmdParam.size(); i++)
   {
     StrObjectPtr item(new StrObject(cmdParam[i].start(), cmdParam[i].len()));
-    listPtr->lpush(item);
+    std::string cmd(cmdParam[0].start(), cmdParam[0].len());
+    if (::strcasecmp(cmd.c_str(), "LPUSH") == 0)
+    {
+      listPtr->lpush(item);
+    }
+    else
+    {
+      listPtr->rpush(item);
+    }
   }
 
   if (objPtr.get() == NULL)
   {
-    instance->updateKeyValue(key, listPtr);
+    std::string key(cmdParam[1].start(), cmdParam[1].len());
+    DatabaseManage::getInstance()->updateKeyValue(key, listPtr);
   }
 
 
   return IntResponsePtr(new IntResponse(listPtr->llen()));
 }
 
-///////////////////////// cmd of lpop begin ///////////////////////////////
-std::string LpopCmd::name_("LPOP");
-LpopCmd LpopCmd::prototype_;
+///////////////////////// cmd of pop begin ///////////////////////////////
+std::string PopCmd::name_("LPOP RPOP");
+PopCmd PopCmd::prototype_;
 
-LpopCmd::LpopCmd()
+PopCmd::PopCmd()
 {
   Cmd::addPrototype(name_, this);
 }
 
-LpopCmd::LpopCmd(const std::string& name)
+PopCmd::PopCmd(const std::string& name)
 {
   (void)name;
 }
 
-ResponsePtr LpopCmd::process(const std::vector<RequestParam>& cmdParam)
+ResponsePtr PopCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() != 2)
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lpop' command"));
+    return paramCheckRsp;
   }
-
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
 
   if (!objPtr.get())
   {
     return ResponsePtr(new BulkResponse(StrObjectPtr()));
   }
 
-  if (objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
-  }
-
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
-  StrObjectPtr item = listPtr->lpop();
+  std::string cmd(cmdParam[0].start(), cmdParam[0].len());
+  StrObjectPtr item = (::strcasecmp(cmd.c_str(), "LPOP") == 0) ?
+                      listPtr->lpop() : listPtr->rpop();
   if (listPtr->llen() == 0)
   {
-    instance->deleteKeyValue(key);
-  }
-
-  return BulkResponsePtr(new BulkResponse(item));
-}
-
-///////////////////////// cmd of rpush begin ///////////////////////////////
-std::string RpushCmd::name_("RPUSH");
-RpushCmd RpushCmd::prototype_;
-
-RpushCmd::RpushCmd()
-{
-  Cmd::addPrototype(name_, this);
-}
-
-RpushCmd::RpushCmd(const std::string& name)
-{
-  (void)name;
-}
-
-ResponsePtr RpushCmd::process(const std::vector<RequestParam>& cmdParam)
-{
-  if (cmdParam.size() <= 2)
-  {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lpush' command"));
-  }
-
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
-
-  if (objPtr.get() && objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
-  }
-
-  ListObjectPtr listPtr = objPtr.get() ? boost::static_pointer_cast<ListObject>(objPtr)
-                                       : ListObjectPtr(new ListObject());
-
-  for (size_t i = 2; i < cmdParam.size(); i++)
-  {
-    StrObjectPtr item(new StrObject(cmdParam[i].start(), cmdParam[i].len()));
-    listPtr->rpush(item);
-  }
-
-  if (objPtr.get() == NULL)
-  {
-    instance->updateKeyValue(key, listPtr);
-  }
-
-
-  return IntResponsePtr(new IntResponse(listPtr->llen()));
-}
-
-///////////////////////// cmd of lpop begin ///////////////////////////////
-std::string RpopCmd::name_("RPOP");
-RpopCmd RpopCmd::prototype_;
-
-RpopCmd::RpopCmd()
-{
-  Cmd::addPrototype(name_, this);
-}
-
-RpopCmd::RpopCmd(const std::string& name)
-{
-  (void)name;
-}
-
-ResponsePtr RpopCmd::process(const std::vector<RequestParam>& cmdParam)
-{
-  if (cmdParam.size() != 2)
-  {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lpop' command"));
-  }
-
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
-
-  if (!objPtr.get())
-  {
-    return ResponsePtr(new BulkResponse(StrObjectPtr()));
-  }
-
-  if (objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
-  }
-
-  ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
-  StrObjectPtr item = listPtr->rpop();
-  if (listPtr->llen() == 0)
-  {
-    instance->deleteKeyValue(key);
+    std::string key(cmdParam[1].start(), cmdParam[1].len());
+    DatabaseManage::getInstance()->deleteKeyValue(key);
   }
 
   return BulkResponsePtr(new BulkResponse(item));
@@ -213,22 +122,17 @@ LlenCmd::LlenCmd(const std::string& name)
 
 ResponsePtr LlenCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() != 2)
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'llen' command"));
+    return paramCheckRsp;
   }
 
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
   if (!objPtr.get())
   {
     return ResponsePtr(new IntResponse(0));
-  }
-
-  if (objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
@@ -252,9 +156,12 @@ LrangeCmd::LrangeCmd(const std::string& name)
 
 ResponsePtr LrangeCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() != 4)
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lrange' command"));
+    return paramCheckRsp;
   }
 
   long long start = 0;
@@ -265,17 +172,9 @@ ResponsePtr LrangeCmd::process(const std::vector<RequestParam>& cmdParam)
     return ResponsePtr(new ErrResponse("ERR", "value is not an integer or out of range"));
   }
 
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
   if (!objPtr.get())
   {
     return ResponsePtr(new ArraysResponse());
-  }
-
-  if (objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
@@ -316,9 +215,12 @@ LremCmd::LremCmd(const std::string& name)
 
 ResponsePtr LremCmd::process(const std::vector<RequestParam>& cmdParam)
 {
-  if (cmdParam.size() != 4)
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
+  if (paramCheckRsp.get())
   {
-    return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'lrem' command"));
+    return paramCheckRsp;
   }
 
   long long count = 0;
@@ -327,17 +229,9 @@ ResponsePtr LremCmd::process(const std::vector<RequestParam>& cmdParam)
     return ResponsePtr(new ErrResponse("ERR", "value is not an integer or out of range"));
   }
 
-  std::string key(cmdParam[1].start(), cmdParam[1].len());
-  DatabaseManage *instance = DatabaseManage::getInstance();
-  ObjectPtr objPtr = instance->queryKeyValue(key);
   if (!objPtr.get())
   {
     return ResponsePtr(new IntResponse(0));
-  }
-
-  if (objPtr->typeNmae() != "list")
-  {
-    return ResponsePtr(new ErrResponse("WRONGTYPE", "Operation against a key holding the wrong kind of value"));
   }
 
   ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
@@ -358,7 +252,8 @@ ResponsePtr LremCmd::process(const std::vector<RequestParam>& cmdParam)
 
   if (listPtr->llen() == 0)
   {
-    instance->deleteKeyValue(key);
+    std::string key(cmdParam[1].start(), cmdParam[1].len());
+    DatabaseManage::getInstance()->deleteKeyValue(key);
   }
 
   return ResponsePtr(new IntResponse(ret));
