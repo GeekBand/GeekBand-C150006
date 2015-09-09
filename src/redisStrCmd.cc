@@ -11,9 +11,6 @@ namespace redis
 {
 ///////////////////////// cmd of set begin ///////////////////////////////
 
-std::map<std::string, Cmd*> Cmd::prototypeMap_;
-
-
 std::string SetCmd::name_("SET");
 SetCmd SetCmd::prototype_;
 

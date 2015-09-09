@@ -31,7 +31,7 @@ class Cmd
   static ResponsePtr checkParamNum(const std::vector<RequestParam>& cmdParam,
                                    const ParamNumCheckFunc& cb);
  private:
-  static std::map<std::string, Cmd*> prototypeMap_;
+  static std::map<std::string, Cmd*>& getCmdPrototypeMap();
 };
 
 }

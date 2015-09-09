@@ -12,6 +12,12 @@
 namespace redis
 {
 
+std::map<std::string, Cmd*>& Cmd::getCmdPrototypeMap()
+{
+  static std::map<std::string, Cmd*> prototypeMap_;
+
+  return prototypeMap_;
+}
 
 void Cmd::addPrototype(const std::string& typeName, Cmd* cmd)
 {
@@ -20,11 +26,13 @@ void Cmd::addPrototype(const std::string& typeName, Cmd* cmd)
                  std::back_inserter(upperStr), ::toupper);
   std::istringstream iss(upperStr);
   std::string cmdName;
+
+  std::map<std::string, Cmd*>& prototypeMap = getCmdPrototypeMap();
   while (iss >> cmdName)
   {
-    if (prototypeMap_.find(cmdName) == prototypeMap_.end())
+    if (prototypeMap.find(cmdName) == prototypeMap.end())
     {
-      Cmd::prototypeMap_[cmdName] = cmd;
+      prototypeMap[cmdName] = cmd;
     }
 
   }
@@ -36,11 +44,12 @@ const Cmd* Cmd::getPrototypeByName(const std::string& typeName)
   std::string upperStr;
   std::transform(typeName.begin(), typeName.end(),
                  std::back_inserter(upperStr), ::toupper);
+  std::map<std::string, Cmd*>& prototypeMap = getCmdPrototypeMap();
 
   std::map<std::string, Cmd*>::iterator ite =
-          prototypeMap_.find(upperStr);
+          prototypeMap.find(upperStr);
 
-  if (ite != prototypeMap_.end())
+  if (ite != prototypeMap.end())
   {
     ret = ite->second;
   }
