@@ -92,6 +92,23 @@ class LremCmd: public Cmd
   static LremCmd prototype_;
 };
 
+//////////////////////////// cmd of lindex start /////////////////////////////
+class LindexCmd: public Cmd
+{
+ public:
+  Cmd *clone() const { return new LindexCmd(name_); }
+  ResponsePtr process(const std::vector<RequestParam>& cmdParam);
+  const std::string& typeName() const { return name_; }
+ private:
+  LindexCmd();
+  LindexCmd(const std::string& name);
+
+  static bool paramNumCheck(size_t num) { return num == 3; }
+
+  static std::string name_;
+  static LindexCmd prototype_;
+};
+
 }
 
 #endif

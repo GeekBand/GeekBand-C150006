@@ -259,4 +259,58 @@ ResponsePtr LremCmd::process(const std::vector<RequestParam>& cmdParam)
   return ResponsePtr(new IntResponse(ret));
 }
 
+///////////////////////// cmd of lrange begin ///////////////////////////////
+std::string LindexCmd::name_("LINDEX");
+LindexCmd LindexCmd::prototype_;
+
+LindexCmd::LindexCmd()
+{
+  Cmd::addPrototype(name_, this);
+}
+
+LindexCmd::LindexCmd(const std::string& name)
+{
+  (void)name;
+}
+
+ResponsePtr LindexCmd::process(const std::vector<RequestParam>& cmdParam)
+{
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
+  if (paramCheckRsp.get())
+  {
+    return paramCheckRsp;
+  }
+
+  if (!objPtr.get())
+  {
+    return ResponsePtr(new BulkResponse(StrObjectPtr()));
+  }
+
+  long long idx = 0;
+  if (!convertStrToLongLong(cmdParam[2].start(), cmdParam[2].len(), &idx))
+  {
+    return ResponsePtr(new ErrResponse("ERR", "value is not an integer or out of range"));
+  }
+
+  ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
+  if (idx < 0)
+  {
+    idx += static_cast<long long>(listPtr->llen());
+    if (idx < 0)
+    {
+      return ResponsePtr(new BulkResponse(StrObjectPtr()));
+    }
+  }
+
+  ListObject::ListObjIte ite = listPtr->getIteratorByIdx(idx);
+  if (ite == listPtr->end())
+  {
+    return ResponsePtr(new BulkResponse(StrObjectPtr()));
+  }
+
+  return ResponsePtr(new BulkResponse(*ite));
+}
+
 }

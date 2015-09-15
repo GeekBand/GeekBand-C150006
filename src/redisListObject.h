@@ -29,6 +29,8 @@ class ListObject: public Object
   size_t llen() { return list_.size(); }
 
   ListObjIte getIteratorByIdx(size_t idx);
+  ListObjIte end() { return list_.end(); }
+  ListObjIte begin() { return list_.begin(); }
   int remove(const std::string& val, int num);
   int remove_reverse(const std::string& val, int num);
  private:
