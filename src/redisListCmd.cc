@@ -313,4 +313,54 @@ ResponsePtr LindexCmd::process(const std::vector<RequestParam>& cmdParam)
   return ResponsePtr(new BulkResponse(*ite));
 }
 
+///////////////////////// cmd of lset begin ///////////////////////////////
+std::string LsetCmd::name_("LSET");
+LsetCmd LsetCmd::prototype_;
+
+LsetCmd::LsetCmd()
+{
+  Cmd::addPrototype(name_, this);
+}
+
+LsetCmd::LsetCmd(const std::string& name)
+{
+  (void)name;
+}
+
+ResponsePtr LsetCmd::process(const std::vector<RequestParam>& cmdParam)
+{
+  ObjectPtr objPtr;
+  ResponsePtr paramCheckRsp = checkTypeAndParamNum(cmdParam, paramNumCheck,
+                                                   "list", &objPtr);
+  if (paramCheckRsp.get())
+  {
+    return paramCheckRsp;
+  }
+
+  if (!objPtr.get())
+  {
+    return ResponsePtr(new ErrResponse("ERR", "no such key"));
+  }
+
+  long long idx = 0;
+  if (!convertStrToLongLong(cmdParam[2].start(), cmdParam[2].len(), &idx))
+  {
+    return ResponsePtr(new ErrResponse("ERR", "value is not an integer or out of range"));
+  }
+
+  ListObjectPtr listPtr = boost::static_pointer_cast<ListObject>(objPtr);
+  if (idx < 0)
+  {
+    idx += static_cast<long long>(listPtr->llen());
+  }
+  if (idx < 0 || idx >= static_cast<long long>(listPtr->llen()))
+  {
+    return ResponsePtr(new ErrResponse("ERR", "index out of range"));
+  }
+
+  ListObject::ListObjIte ite = listPtr->getIteratorByIdx(idx);
+  (*ite)->setStrObjVal(cmdParam[0].start(), cmdParam[0].len());
+  return ResponsePtr(new SimpleStrResponse("OK"));
+}
+
 }

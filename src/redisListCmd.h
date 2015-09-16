@@ -109,6 +109,23 @@ class LindexCmd: public Cmd
   static LindexCmd prototype_;
 };
 
+//////////////////////////// cmd of lset start /////////////////////////////
+class LsetCmd: public Cmd
+{
+ public:
+  Cmd *clone() const { return new LsetCmd(name_); }
+  ResponsePtr process(const std::vector<RequestParam>& cmdParam);
+  const std::string& typeName() const { return name_; }
+ private:
+  LsetCmd();
+  LsetCmd(const std::string& name);
+
+  static bool paramNumCheck(size_t num) { return num == 4; }
+
+  static std::string name_;
+  static LsetCmd prototype_;
+};
+
 }
 
 #endif
