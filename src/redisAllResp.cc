@@ -12,7 +12,7 @@ namespace redis
 IntResponse::IntResponse(int64_t val)
   :val_(val)
 {
-  strLen_ = ::snprintf(buf_, sizeof(buf_), "%ld", val_);
+  strLen_ = static_cast<size_t>(::snprintf(buf_, sizeof(buf_), "%ld", val_));
 }
 
 size_t IntResponse::size() const
@@ -122,7 +122,7 @@ size_t ArraysResponse::ArraysResponse::size() const
   if (allResp_.size() != 0)
   {
     char buf[64];
-    size = ::snprintf(buf, sizeof(buf), "%ld", allResp_.size());
+    size = static_cast<size_t>(::snprintf(buf, sizeof(buf), "%ld", allResp_.size()));
     //* + \r\n
     size += (1 + 2);
     size += totalDataLen_;

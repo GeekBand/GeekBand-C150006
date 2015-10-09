@@ -12,6 +12,12 @@ class Object
 {
  public:
   virtual const std::string& typeName() const = 0;
+  virtual const std::string& encodingType() const
+  {
+    static std::string defEncoding("raw"); 
+
+    return defEncoding;
+  }
   virtual ~Object() { ::printf("~Object()\n"); }
 };
 

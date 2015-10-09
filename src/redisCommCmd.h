@@ -1,5 +1,5 @@
-#ifndef _REDISSTRCMD_H_
-#define _REDISSTRCMD_H_
+#ifndef _REDISCOMMCMD_H_
+#define _REDISCOMMCMD_H_
 
 #include <iostream>
 
@@ -37,6 +37,21 @@ class TypeCmd: public Cmd
 
   static std::string name_;
   static TypeCmd prototype_;
+};
+
+//////////////////////////// cmd of OBJECT start /////////////////////////////
+class ObjectCmd: public Cmd
+{
+ public:
+  Cmd *clone() const;
+  ResponsePtr process(const std::vector<RequestParam>& cmdParam);
+  const std::string& typeName() const { return name_; }
+ private:
+  ObjectCmd();
+  ObjectCmd(const std::string& name);
+
+  static std::string name_;
+  static ObjectCmd prototype_;
 };
 
 }
