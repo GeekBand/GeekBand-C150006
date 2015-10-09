@@ -9,30 +9,25 @@
 namespace redis
 {
 
+class StrObject;
+typedef boost::shared_ptr<StrObject> StrObjectPtr;
+
 class StrObject: public Object
 {
  public:
-  StrObject() { }
-  StrObject(const char *begin, size_t len)
-    : str_(begin, len) { }
-  StrObject(std::string& str)
-    : str_(str) { }
-
   const std::string& typeName() const;
 
-  size_t getSize() const;
-  const std::string& getStrObjVal() const;
-  void setStrObjVal(const std::string& val);
-  void setStrObjVal(const char *str, size_t len);
-
-  std::string& getStr() { return str_; }
+  virtual const std::string& encodingType() const = 0;
+  virtual StrObjectPtr set(const char *str, size_t len) = 0;
+  virtual std::string get() = 0;
+  virtual StrObjectPtr append(const char *str, size_t len) = 0;
+  virtual StrObjectPtr incrByFloat(const char *str, size_t len) = 0;
+  virtual size_t strLen() const = 0;
+  virtual std::string setRange() = 0;
+  virtual std::string getRange() = 0;
  private:
-  std::string str_;
-
   static std::string typeName_;
 };
-
-typedef boost::shared_ptr<StrObject> StrObjectPtr;
 
 }
 

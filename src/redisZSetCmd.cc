@@ -4,6 +4,7 @@
 #include "redisZSetObject.h"
 #include "redisObject.h"
 #include "redisStrObject.h"
+#include "redisStrRawObject.h"
 #include "redisMapDatabase.h"
 #include "redisAllResp.h"
 #include "redisDbManage.h"
@@ -69,7 +70,7 @@ ResponsePtr ZaddCmd::process(const std::vector<RequestParam>& cmdParam)
     std::string key(cmdParam[i].start(), cmdParam[i].len());
     double score = ::atof(key.c_str());
 
-    StrObjectPtr item(new StrObject(cmdParam[i+1].start(), cmdParam[i+1].len()));
+    StrObjectPtr item(new StrRawObject(cmdParam[i+1].start(), cmdParam[i+1].len()));
 
     zsetPtr->zadd(score, item);
     ++successNum;

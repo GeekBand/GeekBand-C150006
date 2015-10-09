@@ -64,7 +64,7 @@ int ListObject::remove(const std::string& val, int num)
   ListObjIte ite = list_.begin();
   while (ite != list_.end() && counter < num)
   {
-    if ((*ite)->getStrObjVal() == val)
+    if ((*ite)->get() == val)
     {
       ite = list_.erase(ite);
       counter++;
@@ -84,7 +84,7 @@ int ListObject::remove_reverse(const std::string& val, int num)
   std::list<StrObjectPtr>::reverse_iterator rite = list_.rbegin();
   while (rite != list_.rend() && counter < num)
   {
-    if ((*rite)->getStrObjVal() == val)
+    if ((*rite)->get() == val)
     {
       list_.erase((++rite).base());
       counter++;

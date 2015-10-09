@@ -11,6 +11,8 @@ RMFLAGS = -rf
 CPP = g++
 CC = gcc
 
+ver = 64
+
 ifeq ($(ver),64)
 DIR_LIBS = ../muduo_x64/lib 
 INCLUDE_DIRS = -I../muduo_x64/include

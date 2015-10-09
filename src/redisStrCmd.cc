@@ -6,6 +6,9 @@
 #include "redisMapDatabase.h"
 #include "redisAllResp.h"
 #include "redisDbManage.h"
+#include "redisStrRawObject.h"
+#include "redisStrIntObject.h"
+#include "redisUtility.h"
 
 namespace redis
 {
@@ -32,7 +35,17 @@ ResponsePtr SetCmd::process(const std::vector<RequestParam>& cmdParam)
     return ResponsePtr();
   }
 
-  ObjectPtr strObj(new StrObject(cmdParam[2].start(), cmdParam[2].len()));
+  long long llval = 0;
+  ObjectPtr strObj;
+  if (convertStrToLongLong(cmdParam[2].start(), cmdParam[2].len(), &llval)
+      && llval <= LONG_MAX && llval >= LONG_MIN)
+  {
+    strObj = ObjectPtr(new StrIntObject((long)llval)); 
+  }
+  else
+  {
+    strObj = ObjectPtr(new StrRawObject(cmdParam[2].start(), cmdParam[2].len()));
+  }
   std::string key(cmdParam[1].start(), cmdParam[1].len());
 
   DatabaseManage *dbm = DatabaseManage::getInstance();
@@ -86,7 +99,7 @@ ResponsePtr GetCmd::process(const std::vector<RequestParam>& cmdParam)
   }
 
   boost::shared_ptr<StrObject> strObj = boost::static_pointer_cast<StrObject>(val);
-  LOG_INFO << "The val is " << '"' << strObj->getStrObjVal() << '"';
+  LOG_INFO << "The val is " << '"' << strObj->get() << '"';
 
   return ResponsePtr(new BulkResponse(strObj));
 }

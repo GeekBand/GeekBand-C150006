@@ -8,6 +8,7 @@
 #include "redisAllResp.h"
 #include "redisDbManage.h"
 #include "redisStrObject.h"
+#include "redisStrRawObject.h"
 #include "redisUtility.h"
 
 namespace redis
@@ -42,7 +43,7 @@ ResponsePtr PushCmd::process(const std::vector<RequestParam>& cmdParam)
 
   for (size_t i = 2; i < cmdParam.size(); i++)
   {
-    StrObjectPtr item(new StrObject(cmdParam[i].start(), cmdParam[i].len()));
+    StrObjectPtr item(new StrRawObject(cmdParam[i].start(), cmdParam[i].len()));
     std::string cmd(cmdParam[0].start(), cmdParam[0].len());
     if (::strcasecmp(cmd.c_str(), "LPUSH") == 0)
     {
@@ -359,7 +360,7 @@ ResponsePtr LsetCmd::process(const std::vector<RequestParam>& cmdParam)
   }
 
   ListObject::ListObjIte ite = listPtr->getIteratorByIdx(idx);
-  (*ite)->setStrObjVal(cmdParam[0].start(), cmdParam[0].len());
+  (*ite)->set(cmdParam[0].start(), cmdParam[0].len());
   return ResponsePtr(new SimpleStrResponse("OK"));
 }
 
