@@ -23,7 +23,7 @@ endif
 
 LINK_LIBS = -lmuduo_net -lmuduo_base -lpthread
 
-CFLAGS = -Wall -gdwarf-2 -g3 -O0 $(INCLUDE_DIRS)
+CFLAGS = -Wall -gdwarf-2 -g3 -O0 $(INCLUDE_DIRS) -D__STDC_FORMAT_MACROS
 
 RMS = $(OBJS) $(TARGET)
 

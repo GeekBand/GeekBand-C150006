@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "redisResp.h"
 #include "redisAllResp.h"
@@ -12,7 +13,7 @@ namespace redis
 IntResponse::IntResponse(int64_t val)
   :val_(val)
 {
-  strLen_ = static_cast<size_t>(::snprintf(buf_, sizeof(buf_), "%ld", val_));
+  strLen_ = static_cast<size_t>(::snprintf(buf_, sizeof(buf_), "%" PRId64, val_));
 }
 
 size_t IntResponse::size() const
@@ -80,7 +81,7 @@ BulkResponse::BulkResponse(const StrObjectPtr& strObj)
 {
   if (strObj.get() != NULL)
   {
-    lenBin = snprintf(lenStr, sizeof(lenStr), "%lu", strObj->strLen());
+    lenBin = snprintf(lenStr, sizeof(lenStr), "%lu", static_cast<unsigned long>(strObj->strLen()));
   }
 }
 
@@ -122,7 +123,8 @@ size_t ArraysResponse::ArraysResponse::size() const
   if (allResp_.size() != 0)
   {
     char buf[64];
-    size = static_cast<size_t>(::snprintf(buf, sizeof(buf), "%ld", allResp_.size()));
+    size = static_cast<size_t>(::snprintf(buf, sizeof(buf), "%lu", 
+                static_cast<unsigned long>(allResp_.size())));
     //* + \r\n
     size += (1 + 2);
     size += totalDataLen_;
@@ -144,7 +146,7 @@ bool ArraysResponse::serializeToString(std::string* output) const
     output->append("*");
 
     char buf[64];
-    ::snprintf(buf, sizeof(buf), "%ld", allResp_.size());
+    ::snprintf(buf, sizeof(buf), "%lu", static_cast<unsigned long>(allResp_.size()));
     output->append(buf);
 
     output->append("\r\n");
