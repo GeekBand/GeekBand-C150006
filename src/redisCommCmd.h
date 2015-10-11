@@ -2,6 +2,8 @@
 #define _REDISCOMMCMD_H_
 
 #include <iostream>
+#include <map>
+#include <boost/function.hpp>
 
 #include "redisCmd.h"
 #include "redisRequest.h"
@@ -43,12 +45,17 @@ class TypeCmd: public Cmd
 class ObjectCmd: public Cmd
 {
  public:
+  typedef boost::function<ResponsePtr (const ObjectPtr&)> SubParamProcFunc;
+  typedef std::map<std::string, SubParamProcFunc> SubParamProcMap;
   Cmd *clone() const;
   ResponsePtr process(const std::vector<RequestParam>& cmdParam);
   const std::string& typeName() const { return name_; }
  private:
   ObjectCmd();
   ObjectCmd(const std::string& name);
+
+  static SubParamProcMap& getSubParamProcMap();
+  static ResponsePtr subParamProc(const ObjectPtr& obj);
 
   static std::string name_;
   static ObjectCmd prototype_;

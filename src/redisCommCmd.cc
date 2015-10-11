@@ -82,6 +82,8 @@ ObjectCmd ObjectCmd::prototype_;
 ObjectCmd::ObjectCmd()
 {
   Cmd::addPrototype(name_, this);
+
+  (getSubParamProcMap())["encoding"] = subParamProc;
 }
 
 ObjectCmd::ObjectCmd(const std::string& name)
@@ -96,20 +98,41 @@ ResponsePtr ObjectCmd::process(const std::vector<RequestParam>& cmdParam)
     return ResponsePtr(new ErrResponse("ERR", "wrong number of arguments for 'object' command"));
   }
 
+  std::string subParam(cmdParam[1].start(), cmdParam[1].len());
+  std::string lowerParam;
+  std::transform(subParam.begin(), subParam.end(),
+                 std::back_inserter(lowerParam), ::tolower);
+  SubParamProcMap::iterator ite = getSubParamProcMap().find(lowerParam);
+  if (ite == getSubParamProcMap().end())
+  {
+    return ResponsePtr(new ErrResponse("ERR", "Syntax error. Try OBJECT \(refcount|encoding|idletime)"));
+  }
+
   DatabaseManage *dbm = DatabaseManage::getInstance();
   ObjectPtr obj = dbm->queryKeyValue(std::string(cmdParam[2].start(), cmdParam[2].len()));
-
   if (obj.get() == NULL)
   {
     return ResponsePtr(new BulkResponse(StrObjectPtr()));
   }
 
-  return ResponsePtr(new SimpleStrResponse(obj->encodingType()));
+  return ite->second(obj); 
 }
 
 Cmd *ObjectCmd::clone() const
 {
   return new ObjectCmd(name_);
+}
+
+ObjectCmd::SubParamProcMap& ObjectCmd::getSubParamProcMap()
+{
+  static SubParamProcMap map;
+
+  return map;
+}
+
+ResponsePtr ObjectCmd::subParamProc(const ObjectPtr& obj)
+{
+  return SimpleStrResponsePtr(new SimpleStrResponse(obj->encodingType()));
 }
 
 }
