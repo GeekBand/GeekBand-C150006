@@ -25,6 +25,14 @@ class LoadRdbFile
   RdbIo *io_;
 
   static const int kDefRdbVersion = 6;
+
+  enum RdbOpcode
+  {
+    kOpcodeExpireTimeMs = 252,
+    kOpcodeExpireTime,
+    kOpcodeSelectDb,
+    kOpcodeEof
+  };
 };
 
 }

@@ -11,12 +11,13 @@ RdbIo::RdbIo(int fd, ChecksumCallback cb, size_t chunk)
 {
 }
 
-int RdbIo::readAll(char *buf, size_t len)
+int RdbIo::readAll(void *buf, size_t len)
 {
   size_t readedLen = 0;
   while (readedLen < len)
   {
-    ssize_t ret = ::read(fd_, buf + readedLen, len - readedLen); 
+    ssize_t ret = ::read(fd_, static_cast<char *>(buf) + readedLen,
+                         len - readedLen); 
     if (ret <= 0)
     {
       return -1; 
@@ -28,12 +29,13 @@ int RdbIo::readAll(char *buf, size_t len)
   return static_cast<int>(readedLen);
 }
 
-int RdbIo::writeAll(const char *buf, size_t len)
+int RdbIo::writeAll(const void *buf, size_t len)
 {
   size_t writedLen = 0;
   while (writedLen < len)
   {
-    ssize_t ret = ::write(fd_, buf + writedLen, len - writedLen); 
+    ssize_t ret = ::write(fd_, static_cast<const char *>(buf) + writedLen,
+                          len - writedLen); 
     if (ret <= 0)
     {
       return -1; 
@@ -45,45 +47,47 @@ int RdbIo::writeAll(const char *buf, size_t len)
   return static_cast<int>(writedLen);
 }
 
-int RdbIo::rdbRead(char *buf, size_t len)
+int RdbIo::rdbRead(void *buf, size_t len)
 {
   int totalLen = static_cast<int>(len);
+  char *pos = static_cast<char *>(buf);
   while (len > 0)
   {
     size_t sigleLen = len > chunk_ ? chunk_ : len;
-    int ret = readAll(buf, sigleLen);
+    int ret = readAll(pos, sigleLen);
     if (ret < 0)
     {
       return ret; 
     }
 
     processed_ += sigleLen;
-    cksum_ = checkSumFunc_(cksum_, buf, sigleLen);
+    cksum_ = checkSumFunc_(cksum_, pos, sigleLen);
 
     len -= sigleLen;
-    buf += sigleLen;
+    pos += sigleLen;
   }
 
   return totalLen;
 }
 
-int RdbIo::rdbWrite(const char *buf, size_t len)
+int RdbIo::rdbWrite(const void *buf, size_t len)
 {
   int totalLen = static_cast<int>(len);
+  const char *pos = static_cast<const char *>(buf);
   while (len > 0)
   {
     size_t sigleLen = len > chunk_ ? chunk_ : len;
-    int ret = writeAll(buf, sigleLen);
+    int ret = writeAll(pos, sigleLen);
     if (ret < 0)
     {
       return ret; 
     }
 
     processed_ += sigleLen;
-    cksum_ = checkSumFunc_(cksum_, buf, sigleLen);
+    cksum_ = checkSumFunc_(cksum_, pos, sigleLen);
 
     len -= sigleLen;
-    buf += sigleLen;
+    pos += sigleLen;
   }
 
   return totalLen;

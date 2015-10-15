@@ -166,12 +166,13 @@ static const uint64_t crc64_tab[256] = {
   0x536fa08fdfd90e51, 0x29b7d047efec8728,
 };
 
-uint64_t crc64(uint64_t crc, const char *s, uint64_t l)
+uint64_t crc64(uint64_t crc, const void*s, uint64_t l)
 {
   uint64_t j;
+  const uint8_t *us = static_cast<const uint8_t *>(s);
   for (j = 0; j < l; j++)
   {
-    uint8_t byte = static_cast<uint8_t>(s[j]);
+    uint8_t byte = us[j];
     crc = crc64_tab[static_cast<uint8_t>(crc) ^ byte] ^ (crc >> 8);
   }
 
