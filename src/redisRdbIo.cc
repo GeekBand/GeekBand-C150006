@@ -1,3 +1,4 @@
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <muduo/base/Logging.h>
@@ -94,6 +95,15 @@ int RdbIo::rdbWrite(const void *buf, size_t len)
 
   return totalLen;
 }
+
+int RdbIo::putback(const void *buf, size_t len)
+{
+  (void)buf;
+  off_t offset = static_cast<off_t>(-len);
+  
+  return lseek(fd_, offset, SEEK_CUR);
+}
+
 
 int RdbIo::flush()
 {

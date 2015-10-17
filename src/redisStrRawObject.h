@@ -22,10 +22,16 @@ class StrRawObject : public StrObject
   size_t strLen() const;
   std::string setRange();
   std::string getRange();
+
+  Object *clone() { return new StrRawObject(); }
  private:
   std::string str_;
 
+  //此类型的构造函数用于注册
+  StrRawObject(PrototypeEntry* entry);
+
   static std::string encodingType_;
+  static StrRawObject prototype_;
 };
 
 }

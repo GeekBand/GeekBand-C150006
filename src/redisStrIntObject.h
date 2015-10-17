@@ -9,7 +9,7 @@ namespace redis
 class StrIntObject : public StrObject
 {
  public:
-  StrIntObject() { }
+  StrIntObject(): val_(0) { }
   StrIntObject(long v): val_(v) { }
 
   const std::string& encodingType() const;
@@ -23,7 +23,10 @@ class StrIntObject : public StrObject
  private:
   long val_;
 
+  StrIntObject(PrototypeEntry *entry);
+
   static std::string encodingType_;
+  static StrIntObject prototype_;
 };
 
 }

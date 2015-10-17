@@ -3,16 +3,16 @@
 namespace redis
 {
 
-Object::Prototypes& Object::getPrototypeList()
+Object::Prototypes& Object::getAllPrototypes()
 {
   static Prototypes prototypeList;
 
   return prototypeList;
 }
 
-Object::Prototypes Object::getAllPrototypeByType(RdbObjectType)
+Object::Prototypes Object::getPrototypeByType(RdbObjectType)
 {
-  Prototypes& allPrototype = getPrototypeList();
+  Prototypes& allPrototype = getAllPrototypes();
   Prototypes ret;
 
   for (Prototypes::iterator ite = allPrototype.begin();
@@ -22,6 +22,13 @@ Object::Prototypes Object::getAllPrototypeByType(RdbObjectType)
   }
 
   return ret;
+}
+
+void Object::addPrototype(RdbObjectType type, Object *obj)
+{
+  PrototypeEntry entry(type, obj);
+
+  getAllPrototypes().push_back(entry);
 }
 
 }

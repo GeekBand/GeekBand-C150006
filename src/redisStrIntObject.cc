@@ -7,6 +7,14 @@ namespace redis
 {
 
 std::string StrIntObject::encodingType_("int");
+StrIntObject StrIntObject::prototype_(static_cast<PrototypeEntry*>(NULL));
+
+StrIntObject::StrIntObject(PrototypeEntry *entry)
+{
+  (void)entry;
+
+  Object::addPrototype(kRdbObjString, this);
+}
 
 const std::string& StrIntObject::encodingType() const
 {

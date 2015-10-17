@@ -25,6 +25,14 @@ class StrObject: public Object
   virtual size_t strLen() const = 0;
   virtual std::string setRange() = 0;
   virtual std::string getRange() = 0;
+ protected:
+  enum StrEncType
+  {
+    kRdbStrInt8 = 0,
+    kRdbStrInt16,
+    kRdbStrInt32,
+    kRdbStrLzf
+  };
  private:
   static std::string typeName_;
 };

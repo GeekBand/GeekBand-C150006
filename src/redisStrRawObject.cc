@@ -1,9 +1,18 @@
 #include "redisStrRawObject.h"
+#include "redisLoadRdbFile.h"
 
 namespace redis
 {
 
 std::string StrRawObject::encodingType_("raw");
+StrRawObject StrRawObject::prototype_(static_cast<PrototypeEntry*>(NULL));
+
+StrRawObject::StrRawObject(PrototypeEntry *entry)
+{
+  (void)entry;
+
+  Object::addPrototype(kRdbObjString, this);
+}
 
 const std::string& StrRawObject::encodingType() const
 {
@@ -31,6 +40,8 @@ StrObjectPtr StrRawObject::append(const char *str, size_t len)
 }
 StrObjectPtr StrRawObject::incrByFloat(const char *str, size_t len)
 {
+  (void)str;
+  (void)len;
   return StrObjectPtr();
 }
 

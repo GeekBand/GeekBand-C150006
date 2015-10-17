@@ -7,6 +7,8 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
+#include "redisRdbIo.h"
+
 namespace redis
 {
 
@@ -40,9 +42,10 @@ class Object
   typedef std::pair<RdbObjectType, Object*> PrototypeEntry;
   typedef std::vector<PrototypeEntry> Prototypes;
 
-  static Prototypes& getPrototypeList();
-  static Prototypes getAllPrototypeByType(RdbObjectType type);
+  static Prototypes getPrototypeByType(RdbObjectType type);
+  static void addPrototype(RdbObjectType type, Object *obj);
  private:
+  static Prototypes& getAllPrototypes();
 };
 
 typedef boost::shared_ptr<Object> ObjectPtr;

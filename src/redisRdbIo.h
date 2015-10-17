@@ -23,6 +23,17 @@ class RdbIo
 
   virtual uint64_t currentCksum() { return cksum_; }
 
+  virtual int rdbReadNoCksum(void *buf, size_t len)
+  { return readAll(buf, len); }
+
+  virtual int rdbWriteNoCksum(const void *buf, size_t len)
+  { return writeAll(buf, len); }
+
+  virtual uint64_t cksum(const void *buf, size_t len)
+  { return checkSumFunc_(cksum_, buf, len); }
+  
+  virtual int putback(const void *buf, size_t len);
+
   int flush();
 
   virtual ~RdbIo() { }
