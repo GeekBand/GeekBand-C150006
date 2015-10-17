@@ -179,5 +179,50 @@ uint64_t crc64(uint64_t crc, const void*s, uint64_t l)
   return crc;
 }
 
+void memrev64(void *p)
+{
+    unsigned char *x = static_cast<unsigned char *>(p), t;
+
+    t = x[0];
+    x[0] = x[7];
+    x[7] = t;
+    t = x[1];
+    x[1] = x[6];
+    x[6] = t;
+    t = x[2];
+    x[2] = x[5];
+    x[5] = t;
+    t = x[3];
+    x[3] = x[4];
+    x[4] = t;
+}
+
+bool isBigEndian()
+{
+  union
+  {
+    unsigned char bytes[2];
+    unsigned short s;
+  } val;
+
+  val.s = 0x1234;
+
+  return val.bytes[0] == 0x12;
+}
+
+uint64_t bigEndianToLocal64(uint64_t val)
+{
+  if (isBigEndian())
+  {
+    return val;
+  }
+  else
+  {
+    memrev64(&val);
+  }
+
+  return val;
+}
+
 }
 

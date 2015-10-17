@@ -1,5 +1,7 @@
 #include <unistd.h>
 
+#include <muduo/base/Logging.h>
+
 #include "redisRdbIo.h"
 
 namespace redis
