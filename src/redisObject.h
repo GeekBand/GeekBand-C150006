@@ -8,9 +8,11 @@
 #include <boost/shared_ptr.hpp>
 
 #include "redisRdbIo.h"
-
 namespace redis
 {
+
+class Object;
+typedef boost::shared_ptr<Object> ObjectPtr;
 
 class Object
 {
@@ -23,8 +25,9 @@ class Object
     return defEncoding;
   }
   virtual Object* clone() { return NULL; }
-  virtual ~Object() { ::printf("~Object()\n"); }
- protected:
+  virtual ~Object() { }
+  virtual int load(RdbIo *io) { (void)io; return -1; }
+
   enum RdbObjectType
   {
     kRdbObjString = 0,
@@ -38,17 +41,17 @@ class Object
     kRdbObjZsetZiplist,
     kRdbObjHashZiplist
   };
-  
+ 
   typedef std::pair<RdbObjectType, Object*> PrototypeEntry;
   typedef std::vector<PrototypeEntry> Prototypes;
 
   static Prototypes getPrototypeByType(RdbObjectType type);
+  static ObjectPtr loadByPrototypes(Prototypes protos, RdbIo *io);
+ protected:
   static void addPrototype(RdbObjectType type, Object *obj);
  private:
   static Prototypes& getAllPrototypes();
 };
-
-typedef boost::shared_ptr<Object> ObjectPtr;
 
 }
 

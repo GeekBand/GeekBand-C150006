@@ -24,6 +24,7 @@ class StrRawObject : public StrObject
   std::string getRange();
 
   Object *clone() { return new StrRawObject(); }
+  int load(RdbIo *io);
  private:
   std::string str_;
 
@@ -33,6 +34,8 @@ class StrRawObject : public StrObject
   static std::string encodingType_;
   static StrRawObject prototype_;
 };
+
+typedef boost::shared_ptr<StrRawObject> StrRawObjectPtr;
 
 }
 

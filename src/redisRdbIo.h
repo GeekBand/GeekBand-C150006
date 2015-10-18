@@ -18,8 +18,14 @@ class RdbIo
   virtual int rdbWrite(const void *buf, size_t len);
 
   virtual int rdbReadUint8(uint8_t *val) { return rdbRead(val, sizeof(uint8_t)); }
+  virtual int rdbReadUint16(uint16_t *val) { return rdbRead(val, sizeof(uint16_t)); }
   virtual int rdbReadUint32(uint32_t *val) { return rdbRead(val, sizeof(uint32_t)); }
   virtual int rdbReadUint64(uint64_t *val) { return rdbRead(val, sizeof(uint64_t)); }
+
+  virtual int rdbReadInt8(int8_t *val) { return rdbRead(val, sizeof(int8_t)); }
+  virtual int rdbReadInt16(int16_t *val) { return rdbRead(val, sizeof(int16_t)); }
+  virtual int rdbReadInt32(int32_t *val) { return rdbRead(val, sizeof(int32_t)); }
+  virtual int rdbReadInt64(int64_t *val) { return rdbRead(val, sizeof(int64_t)); }
 
   virtual uint64_t currentCksum() { return cksum_; }
 

@@ -1,7 +1,11 @@
 #include <limits.h>
+
+#include <muduo/base/Logging.h>
+
 #include "redisStrIntObject.h"
 #include "redisStrRawObject.h"
 #include "redisUtility.h"
+#include "redisLoadRdbFile.h"
 
 namespace redis
 {
@@ -83,6 +87,55 @@ std::string StrIntObject::setRange()
 std::string StrIntObject::getRange()
 {
   return std::string();
+}
+
+int StrIntObject::load(RdbIo *io)
+{
+  bool encoded;
+  size_t readsize = 0;
+  uint32_t len = LoadRdbFile::loadLength(io, &encoded, &readsize, false);\
+  io->putback(NULL, readsize);
+  if (!encoded)
+  {
+    LOG_WARN << "It is not a string encoded by int";
+    return -1;
+  }
+
+  len = LoadRdbFile::loadLength(io, &encoded, &readsize, true);
+  int ret = 0;
+  switch (len)
+  {
+    case kRdbStrInt8:
+      int8_t val8;
+      ret = io->rdbReadInt8(&val8);
+      val_ = val8;
+      break;
+    case kRdbStrInt16:
+      int16_t val16;
+      ret = io->rdbReadInt16(&val16);
+      val_ = val16;
+      break;
+    case kRdbStrInt32:
+      int32_t val32;
+      ret = io->rdbReadInt32(&val32);
+      val_ = val32;
+      break;
+    default:
+      LOG_WARN << "Unknown type of encoding";
+      val_ = 0;
+      break;
+  }
+  if (ret < 0)
+  {
+    val_ = 0;
+    LOG_WARN << "Read the val of string error";
+  }
+  else
+  {
+    ret = 0;
+  }
+
+  return ret;
 }
 
 }

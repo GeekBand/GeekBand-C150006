@@ -1,3 +1,5 @@
+#include <muduo/base/Logging.h>
+
 #include "redisStrRawObject.h"
 #include "redisLoadRdbFile.h"
 
@@ -58,6 +60,42 @@ std::string StrRawObject::setRange()
 std::string StrRawObject::getRange()
 {
   return std::string();
+}
+
+int StrRawObject::load(RdbIo *io)
+{
+  bool encoded;
+  size_t readsize = 0;
+  uint32_t len = LoadRdbFile::loadLength(io, &encoded, &readsize, false);
+  io->putback(NULL, readsize);
+  if (encoded)
+  {
+    return -1;
+  }
+
+  len = LoadRdbFile::loadLength(io, &encoded, &readsize, true);
+  if (len == LoadRdbFile::kRdbLenErr)
+  {
+    LOG_WARN << "Load length of raw str error";
+    return -1;
+  }
+
+  char buf[512];
+  while (len > 0)
+  {
+    size_t readLen = len > sizeof(buf) ? sizeof(buf) : len;
+    int ret = io->rdbRead(buf, readLen);  
+    if (ret < 0)
+    {
+      LOG_WARN << "read raw string error";
+      return -1;
+    }
+    
+    str_.append(buf, readLen);
+    len -= readLen;
+  }
+
+  return 0;
 }
 
 }

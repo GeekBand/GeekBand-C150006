@@ -20,7 +20,9 @@ class LoadRdbFile
   virtual int close();
   virtual ~LoadRdbFile();
 
-  virtual uint32_t loadLength(bool *encoded);
+  static uint32_t loadLength(RdbIo *io, bool *encoded, size_t *preadsize, bool cksum);
+  static const uint32_t kRdbLenErr = UINT_MAX;
+
  protected:
   char *file_;
  private:
@@ -43,7 +45,6 @@ class LoadRdbFile
     kRdb32BitLen,
     kRdbEncVal
   };
-  static const uint32_t kRdbLenErr = UINT_MAX;
 };
 
 }

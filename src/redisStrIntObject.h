@@ -20,6 +20,9 @@ class StrIntObject : public StrObject
   size_t strLen() const;
   std::string setRange();
   std::string getRange();
+
+  Object *clone() {return new StrIntObject(); }
+  int load(RdbIo *io);
  private:
   long val_;
 

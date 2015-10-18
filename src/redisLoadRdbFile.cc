@@ -9,6 +9,7 @@
 
 #include "redisLoadRdbFile.h"
 #include "redisUtility.h"
+#include "redisStrRawObject.h"
 
 #define CHECK_RET_LOG(cond, ret, format, ...)                       \
     do                                                              \
@@ -25,12 +26,24 @@
 namespace redis
 {
 
-uint32_t LoadRdbFile::loadLength(bool *encoded)
+uint32_t LoadRdbFile::loadLength(RdbIo *io, bool *encoded, size_t *preadsize, bool cksum)
 {
   if (encoded != NULL) { *encoded = 0; }
+
   uint8_t first = 0u;
-  CHECK_RET_LOG(io_->rdbReadUint8(&first) < 0, kRdbLenErr,
-                "Read the first byte of the length error");
+  size_t readsize = 0;
+  if (cksum)
+  {
+    CHECK_RET_LOG(io->rdbReadUint8(&first) < 0, kRdbLenErr,
+                  "Read the first byte of the length error");
+  }
+  else
+  {
+    CHECK_RET_LOG(io->rdbReadNoCksum(&first, sizeof(first)) < 0, kRdbLenErr,
+                  "Read the first byte of the length error");
+  }
+  readsize++;
+
   uint8_t type = (first & 0xc0) >> 6;
   uint32_t ret = kRdbLenErr;
   switch (type)
@@ -40,13 +53,33 @@ uint32_t LoadRdbFile::loadLength(bool *encoded)
       break;
     case kRdb14BitLen:
       uint8_t second;
-      CHECK_RET_LOG(io_->rdbReadUint8(&second) < 0, kRdbLenErr,
-                    "Read the second byte of the length error");
+      if (cksum)
+      {
+        CHECK_RET_LOG(io->rdbReadUint8(&second) < 0, kRdbLenErr,
+                      "Read the second byte of the length error");
+      }
+      else
+      {
+        CHECK_RET_LOG(io->rdbReadNoCksum(&second, sizeof(second)) < 0, kRdbLenErr,
+                      "Read the second byte of the length error");
+      }
+      readsize++;
+
       ret = ((first & 0x3f)) << 8 | second;
       break;
     case kRdb32BitLen:
-      CHECK_RET_LOG(io_->rdbReadUint32(&ret) < 0, kRdbLenErr,
-                    "Read the length of 32 bit error");
+      if (cksum)
+      {
+        CHECK_RET_LOG(io->rdbReadUint32(&ret) < 0, kRdbLenErr,
+                      "Read the length of 32 bit error");
+      }
+      else
+      {
+        CHECK_RET_LOG(io->rdbReadNoCksum(&ret, sizeof(ret)) < 0, kRdbLenErr,
+                      "Read the length of 32 bit error");
+      }
+      readsize += 4;
+
       ret = ntohl(ret);
       break;
     case kRdbEncVal:
@@ -58,6 +91,7 @@ uint32_t LoadRdbFile::loadLength(bool *encoded)
       break;
   }
 
+  if (preadsize != NULL) { *preadsize = readsize; }
   return ret;
 }
 
@@ -101,7 +135,7 @@ int LoadRdbFile::load(DatabaseManage *dbm)
 
     if (loadType == kOpcodeSelectDb)
     {
-      uint32_t dbIdx = loadLength(NULL); 
+      uint32_t dbIdx = loadLength(io_, NULL, NULL, true);
       if (dbIdx == kRdbLenErr)
       {
         LOG_WARN << "Read the index of db error";
@@ -110,6 +144,25 @@ int LoadRdbFile::load(DatabaseManage *dbm)
       dbm->getInstance()->select(dbIdx);
       continue;
     }
+    //load Key
+    Object::Prototypes protos = Object::getPrototypeByType(Object::kRdbObjString); 
+    ObjectPtr key = Object::loadByPrototypes(protos, io_);
+    if (key.get() == NULL)
+    {
+      LOG_WARN << "Load key error";
+      return -1;
+    }
+
+    protos = Object::getPrototypeByType(static_cast<Object::RdbObjectType>(loadType));
+    ObjectPtr val = Object::loadByPrototypes(protos, io_);
+    if (val.get() == NULL)
+    {
+      LOG_WARN << "Load val error";
+      return -1;
+    }
+
+    boost::shared_ptr<StrObject> strKey = boost::static_pointer_cast<StrObject>(key);
+    dbm->updateKeyValue(strKey->get(), val);
   }
 
   uint64_t excepted = io_->currentCksum();
